@@ -1,0 +1,41 @@
+# --- Frontend (Next.js) ---
+frontend/node_modules
+frontend/.next/
+frontend/out/
+frontend/build
+frontend/.vercel
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/.pnpm-debug.log*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# --- Backend (Python) ---
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[oc]
+backend/**/*.py[oc]
+backend/build/
+backend/dist/
+backend/*.egg-info
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/htmlcov/
+backend/.coverage
+
+# --- Env files (never commit real secrets) ---
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+!backend/.env.example
+
+# --- Editors / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
