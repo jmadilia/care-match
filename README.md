@@ -1,19 +1,30 @@
-# nextjs-fastapi-template
+# Care Match
 
-A starter template for new projects: **Next.js + TypeScript + Tailwind CSS** frontend, **FastAPI + PostgreSQL** backend.
+A therapist-client matching and waitlist optimization engine: an original take on the hardest problem underneath any telehealth marketplace, which is pairing a client with the right available provider, fast, without a licensure, insurance-panel, or capacity constraint silently producing a bad match.
 
-Use it via GitHub's **"Use this template"** button, or:
+## Why this exists
 
-```bash
-gh repo create my-new-project --template jmadilia/nextjs-fastapi-template --private --clone
-```
+Telehealth marketplaces all sit on top of the same hard problem: providers are a constrained, unevenly distributed resource (licensed only in certain states, paneled with only certain insurers, with a hard weekly capacity), and clients arrive with a mix of hard constraints (insurance, state, timezone) and soft preferences (specialty, modality, language, cultural fit). Naive filter-and-pick-first matching ignores marketplace-level effects: some providers get overloaded while others sit idle, and clients wait longer than they need to.
+
+This project treats matching as a two-sided marketplace optimization problem rather than a lookup query. It builds a synthetic provider/client marketplace and compares several matching strategies, including rule-based filtering, greedy ranked assignment, and a stable-matching/optimization-based approach, against simulated demand, evaluating them on time-to-first-appointment, fill rate, and provider utilization balance.
+
+This is a portfolio project built on synthetic data. It isn't modeled on, or affiliated with, any specific company's internal systems.
+
+## Status
+
+- [ ] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
+- [ ] Matching engine v1: hard-constraint filtering + weighted scoring
+- [ ] Waitlist optimization: priority queue with aging + urgency escalation
+- [ ] Batch stable-matching pass (Gale-Shapley-style) vs. greedy assignment comparison
+- [ ] Marketplace simulation + evaluation metrics (time-to-match, fill rate, utilization variance)
+- [ ] Client intake + admin/ops dashboards (Next.js)
 
 ## Stack
 
 - **Frontend**: Next.js (App Router), TypeScript, Tailwind CSS, ESLint, pnpm
 - **Backend**: FastAPI, SQLAlchemy 2.0, Alembic migrations, Pydantic Settings, uv, pytest, ruff, mypy
 - **Database**: PostgreSQL (via Docker Compose for local dev)
-- **CI**: GitHub Actions — lints, type-checks, builds, and tests both halves on every push/PR
+- **CI**: GitHub Actions, lints, type-checks, builds, and tests both halves on every push/PR
 
 ## Prerequisites
 
@@ -82,13 +93,3 @@ Installs dependencies and starts the app at `http://localhost:3000`, calling the
 | Type-check backend | `cd backend && uv run mypy app` |
 | Lint frontend | `cd frontend && pnpm lint` |
 | Build frontend | `cd frontend && pnpm build` |
-
-## Customizing this template
-
-After cloning for a new project:
-
-1. Update the `name`/`description` in `backend/pyproject.toml` and `frontend/package.json`.
-2. Update `PROJECT_NAME` in `backend/.env` / `.env.example`.
-3. Update the `title`/`description` metadata in `frontend/src/app/layout.tsx`.
-4. Replace the `items` model/routes/schemas (`backend/app/{models,schemas}/item.py`, `backend/app/api/routes/items.py`) with your own domain — they exist to prove the stack works end to end.
-5. Update this README.
