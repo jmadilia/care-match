@@ -24,7 +24,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
 Entities as they land, each with a SQLAlchemy model, Alembic migration, Pydantic schema, and CRUD routes:
 
 - [x] `Provider` (`/api/v1/providers`): license states, specialties, modalities, languages, insurance panels, weekly capacity
-- [ ] `Client`: state, insurance payer, needed specialties, preferred modality/language, urgency
+- [x] `Client` (`/api/v1/clients`): state, insurance payer, needed specialties, preferred modality/language, urgency
 - [ ] `WaitlistEntry`: tracks a client's wait, used to measure time-to-match
 - [ ] `Match`: a client/provider pairing, tagged with the strategy that produced it
 - [ ] `SimulationRun`: groups one experiment so different strategies can be compared against the same synthetic population
