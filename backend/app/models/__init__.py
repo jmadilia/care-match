@@ -3,3 +3,4 @@
 from app.models.client import Client  # noqa: F401
 from app.models.match import Match  # noqa: F401
 from app.models.provider import Provider  # noqa: F401
+from app.models.waitlist_entry import WaitlistEntry  # noqa: F401
