@@ -67,10 +67,10 @@ BALANCED = ScenarioConfig(
     name=ScenarioName.BALANCED,
     description=(
         "Supply tracks demand by state and specialty with realistic skew: Medicaid, "
-        "Spanish and rare specialties are scarce. Overall load sits just under capacity."
+        "Spanish and rare specialties are scarce. Overall load sits right at capacity."
     ),
     horizon_days=28,
-    demand_supply_ratio=0.9,
+    demand_supply_ratio=1.0,
     max_license_states=3,
     multi_state_probability=0.25,
     panel_size_range=(1, 4),
@@ -93,8 +93,8 @@ BALANCED = ScenarioConfig(
         "Cigna": 0.15, "Medicaid": 0.07, "Humana": 0.02,
     },
     specialty_demand_weights={
-        "anxiety": 0.29, "depression": 0.27, "trauma": 0.14, "adhd": 0.10,
-        "couples": 0.08, "ocd": 0.04, "eating_disorders": 0.03, "substance_use": 0.05,
+        "anxiety": 0.22, "depression": 0.20, "trauma": 0.34, "adhd": 0.09,
+        "couples": 0.06, "ocd": 0.03, "eating_disorders": 0.02, "substance_use": 0.04,
     },
     specialty_supply_weights={
         "anxiety": 0.31, "depression": 0.30, "trauma": 0.17, "couples": 0.075,

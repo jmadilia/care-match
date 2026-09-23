@@ -27,7 +27,7 @@ class SimulationRunRead(SimulationRunBase):
 
 class StateBalance(BaseModel):
   state: str
-  weekly_capacity: int
+  weekly_capacity: float
   client_count: int
   capacity_to_demand_ratio: float
 
@@ -38,4 +38,5 @@ class PopulationSummary(BaseModel):
   total_weekly_capacity: int
   unservable_client_share: float
   mean_eligible_providers: float
+  mean_best_specialty_fit: float
   state_balance: list[StateBalance]

@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -72,12 +71,64 @@ def test_client_arrival_day_is_stored_and_validated() -> None:
     assert client.post("/api/v1/clients", json={**payload, "arrival_day": -1}).status_code == 422
 
 
-@pytest.mark.skip(reason="generator not implemented yet")
-def test_generate_creates_population_and_returns_summary() -> None: ...
+def _create_small_run(scenario: str = "balanced") -> str:
+    payload = {
+        "name": "Generate Run",
+        "scenario": scenario,
+        "seed": 5,
+        "provider_count": 3,
+        "client_count": 8,
+    }
+    res = client.post("/api/v1/simulation-runs", json=payload)
+    assert res.status_code == 201
+    return res.json()["id"]
 
 
-@pytest.mark.skip(reason="generator not implemented yet")
-def test_generate_twice_returns_409() -> None: ...
+def _delete_population(run_id: str) -> None:
+    for kind in ("clients", "providers"):
+        rows = client.get(f"/api/v1/{kind}", params={"simulation_run_id": run_id}).json()
+        for row in rows:
+            client.delete(f"/api/v1/{kind}/{row['id']}")
+
+
+def test_generate_creates_population_and_returns_summary() -> None:
+    run_id = _create_small_run()
+    try:
+        res = client.post(f"/api/v1/simulation-runs/{run_id}/generate")
+        assert res.status_code == 201
+        summary = res.json()
+        assert summary["provider_count"] == 3
+        assert summary["client_count"] == 8
+        assert summary["total_weekly_capacity"] == 8
+
+        clients = client.get("/api/v1/clients", params={"simulation_run_id": run_id}).json()
+        providers = client.get("/api/v1/providers", params={"simulation_run_id": run_id}).json()
+        assert len(clients) == 8
+        assert len(providers) == 3
+        assert all(c["arrival_day"] is not None for c in clients)
+        assert all(c["simulation_run_id"] == run_id for c in clients)
+    finally:
+        _delete_population(run_id)
+
+
+def test_generate_twice_returns_409() -> None:
+    run_id = _create_small_run()
+    try:
+        assert client.post(f"/api/v1/simulation-runs/{run_id}/generate").status_code == 201
+        assert client.post(f"/api/v1/simulation-runs/{run_id}/generate").status_code == 409
+    finally:
+        _delete_population(run_id)
+
+
+def test_generate_is_reproducible_across_runs_with_the_same_seed() -> None:
+    first_id, second_id = _create_small_run(), _create_small_run()
+    try:
+        first = client.post(f"/api/v1/simulation-runs/{first_id}/generate").json()
+        second = client.post(f"/api/v1/simulation-runs/{second_id}/generate").json()
+        assert first == second
+    finally:
+        _delete_population(first_id)
+        _delete_population(second_id)
 
 
 def test_generate_unknown_run_returns_404() -> None:

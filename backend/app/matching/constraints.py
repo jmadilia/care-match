@@ -20,4 +20,7 @@ class ProviderLike(Protocol):
 
 def is_eligible(client: ClientLike, provider: ProviderLike) -> bool:
     """Static hard constraints only (state licensed, payer paneled); capacity is dynamic."""
-    raise NotImplementedError
+    return (
+        client.state in provider.license_states
+        and client.insurance_payer in provider.insurance_panels
+    )

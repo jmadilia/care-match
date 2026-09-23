@@ -12,7 +12,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
 
 ## Status
 
-- [ ] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
+- [x] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
 - [ ] Matching engine v1: hard-constraint filtering + weighted scoring
 - [ ] Waitlist optimization: priority queue with aging + urgency escalation
 - [ ] Batch stable-matching pass (Gale-Shapley-style) vs. greedy assignment comparison
@@ -40,7 +40,13 @@ Anchored to public data:
 - Medicaid scarcity (roughly 17% of psychotherapists accept any public insurance) follows a [Georgia study](https://pmc.ncbi.nlm.nih.gov/articles/PMC11708982/). It covers one state, so it is a directional anchor rather than a national figure.
 - Payer demand ordering (Blue Cross plans largest, then UnitedHealthcare) follows [insurer market share reporting](https://medwave.io/2025/12/directory-health-insurance-companies/). The exact shares are estimates.
 
-Assumptions with no public source found: specialty demand and supply shares, provider modality mix, urgency mix, and the 0.9 demand to capacity ratio. That ratio is chosen so allocation decisions matter: near capacity, the matching strategy decides who goes unserved.
+Trauma demand is set so about 58% of clients list trauma among their needs, in line with a practitioner-reported estimate that 50 to 70% of active caseloads involve underlying trauma even when it is not the presenting issue. Public research supports high trauma prevalence among outpatient mental health clients ([Psychiatric Services](https://psychiatryonline.org/doi/10.1176/appi.ps.55.2.157), [Annals of General Psychiatry](https://annals-general-psychiatry.biomedcentral.com/articles/10.1186/s12991-019-0239-1)), but no exact caseload figure was found.
+
+Assumptions with no public source found: the remaining specialty demand and supply shares, provider modality mix, and urgency mix.
+
+Specialty fit is a soft score, not an eligibility constraint. Only state licensure and payer paneling decide who can serve whom. A scarce specialty therefore shows up as lower match quality rather than more unserved clients, and the population summary reports it as `mean_best_specialty_fit`.
+
+The demand to capacity ratio of 1.0 was chosen empirically. Sweeping it from 0.7 to 1.25 on generated populations, the gap between a naive greedy pass and the best possible assignment peaked at 1.0 (about 7 points of clients served for first-fit greedy, 3 for a most-room greedy), so that is where the choice of strategy matters most.
 
 ## Stack
 
