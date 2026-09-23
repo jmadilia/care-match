@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -21,6 +21,9 @@ class Client(Base):
   preferred_modality: Mapped[str] = mapped_column(String(32), nullable=False)
   preferred_language: Mapped[str] = mapped_column(String(64), nullable=False)
   urgency: Mapped[str] = mapped_column(String(255), nullable=False)
+  simulation_run_id: Mapped[uuid.UUID | None] = mapped_column(
+    ForeignKey("simulation_runs.id"), nullable=True
+  )
   created_at: Mapped[datetime] = mapped_column(
     DateTime(timezone=True), server_default=func.now()
   )

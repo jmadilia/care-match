@@ -5,18 +5,28 @@ from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.models.client import Client
+from app.models.simulation_run import SimulationRun
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
 
 @router.get("", response_model=list[ClientRead])
-def list_clients(db: DbSession) -> list[Client]:
-  return list(db.scalars(select(Client).order_by(Client.created_at.desc())))
+def list_clients(db: DbSession, simulation_run_id: uuid.UUID | None = None) -> list[Client]:
+  query = select(Client).order_by(Client.created_at.desc())
+  if simulation_run_id is not None:
+    query = query.where(Client.simulation_run_id == simulation_run_id)
+  return list(db.scalars(query))
 
 
 @router.post("", response_model=ClientRead, status_code=201)
 def create_client(client_in: ClientCreate, db: DbSession) -> Client:
+  if (
+    client_in.simulation_run_id is not None
+    and db.get(SimulationRun, client_in.simulation_run_id) is None
+  ):
+    raise HTTPException(status_code=404, detail="Simulation run not found")
+
   client = Client(**client_in.model_dump())
   db.add(client)
   db.commit()

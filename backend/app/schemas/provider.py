@@ -12,6 +12,7 @@ class ProviderBase(BaseModel):
     languages: list[str]
     insurance_panels: list[str]
     weekly_capacity: int = Field(gt=0)
+    simulation_run_id: uuid.UUID | None = None
 
 
 class ProviderCreate(ProviderBase):

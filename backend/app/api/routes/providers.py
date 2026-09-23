@@ -5,18 +5,30 @@ from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.models.provider import Provider
+from app.models.simulation_run import SimulationRun
 from app.schemas.provider import ProviderCreate, ProviderRead, ProviderUpdate
 
 router = APIRouter(prefix="/providers", tags=["providers"])
 
 
 @router.get("", response_model=list[ProviderRead])
-def list_providers(db: DbSession) -> list[Provider]:
-    return list(db.scalars(select(Provider).order_by(Provider.created_at.desc())))
+def list_providers(
+    db: DbSession, simulation_run_id: uuid.UUID | None = None
+) -> list[Provider]:
+    query = select(Provider).order_by(Provider.created_at.desc())
+    if simulation_run_id is not None:
+        query = query.where(Provider.simulation_run_id == simulation_run_id)
+    return list(db.scalars(query))
 
 
 @router.post("", response_model=ProviderRead, status_code=201)
 def create_provider(provider_in: ProviderCreate, db: DbSession) -> Provider:
+    if (
+        provider_in.simulation_run_id is not None
+        and db.get(SimulationRun, provider_in.simulation_run_id) is None
+    ):
+        raise HTTPException(status_code=404, detail="Simulation run not found")
+
     provider = Provider(**provider_in.model_dump())
     db.add(provider)
     db.commit()

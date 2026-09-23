@@ -27,7 +27,7 @@ Entities as they land, each with a SQLAlchemy model, Alembic migration, Pydantic
 - [x] `Client` (`/api/v1/clients`): state, insurance payer, needed specialties, preferred modality/language, urgency
 - [x] `WaitlistEntry` (`/api/v1/waitlist-entries`): tracks a client's wait, used to measure time-to-match
 - [x] `Match` (`/api/v1/matches`): a client/provider pairing, tagged with the strategy that produced it
-- [ ] `SimulationRun`: groups one experiment so different strategies can be compared against the same synthetic population
+- [x] `SimulationRun` (`/api/v1/simulation-runs`): groups one experiment (seed and population size) so different strategies can be compared against the same synthetic population; clients and providers link to a run via `simulation_run_id`
 
 ## Stack
 
