@@ -15,6 +15,9 @@ class SimulationRun(Base):
     UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
   )
   name: Mapped[str] = mapped_column(String(255), nullable=False)
+  scenario: Mapped[str] = mapped_column(
+    String(64), nullable=False, server_default="balanced"
+  )
   seed: Mapped[int] = mapped_column(Integer, nullable=False)
   provider_count: Mapped[int] = mapped_column(Integer, nullable=False)
   client_count: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -21,6 +21,7 @@ class Client(Base):
   preferred_modality: Mapped[str] = mapped_column(String(32), nullable=False)
   preferred_language: Mapped[str] = mapped_column(String(64), nullable=False)
   urgency: Mapped[str] = mapped_column(String(255), nullable=False)
+  arrival_day: Mapped[int | None] = mapped_column(Integer, nullable=True)
   simulation_run_id: Mapped[uuid.UUID | None] = mapped_column(
     ForeignKey("simulation_runs.id"), nullable=True
   )

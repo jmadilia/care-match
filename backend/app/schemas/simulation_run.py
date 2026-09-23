@@ -3,9 +3,12 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.simulation.config import ScenarioName
+
 
 class SimulationRunBase(BaseModel):
   name: str
+  scenario: ScenarioName = ScenarioName.BALANCED
   seed: int
   provider_count: int = Field(gt=0)
   client_count: int = Field(gt=0)
@@ -20,3 +23,19 @@ class SimulationRunRead(SimulationRunBase):
 
   id: uuid.UUID
   created_at: datetime
+
+
+class StateBalance(BaseModel):
+  state: str
+  weekly_capacity: int
+  client_count: int
+  capacity_to_demand_ratio: float
+
+
+class PopulationSummary(BaseModel):
+  provider_count: int
+  client_count: int
+  total_weekly_capacity: int
+  unservable_client_share: float
+  mean_eligible_providers: float
+  state_balance: list[StateBalance]

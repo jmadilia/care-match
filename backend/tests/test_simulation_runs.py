@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -35,6 +36,53 @@ def test_simulation_run_create_get_list() -> None:
 
     missing_res = client.get(f"/api/v1/simulation-runs/{FAKE_ID}")
     assert missing_res.status_code == 404
+
+
+def test_simulation_run_scenario_defaults_and_validates() -> None:
+    base = {"name": "Scenario Run", "seed": 1, "provider_count": 5, "client_count": 5}
+
+    default_res = client.post("/api/v1/simulation-runs", json=base)
+    assert default_res.status_code == 201
+    assert default_res.json()["scenario"] == "balanced"
+
+    explicit_res = client.post(
+        "/api/v1/simulation-runs", json={**base, "scenario": "undersupplied_state"}
+    )
+    assert explicit_res.status_code == 201
+    assert explicit_res.json()["scenario"] == "undersupplied_state"
+
+    bad_res = client.post("/api/v1/simulation-runs", json={**base, "scenario": "nonsense"})
+    assert bad_res.status_code == 422
+
+
+def test_client_arrival_day_is_stored_and_validated() -> None:
+    payload = {
+        "name": "Arrival Client",
+        "state": "CA",
+        "insurance_payer": "Aetna",
+        "needed_specialties": ["anxiety"],
+        "preferred_modality": "video",
+        "preferred_language": "en",
+        "arrival_day": 12,
+    }
+    res = client.post("/api/v1/clients", json=payload)
+    assert res.status_code == 201
+    assert res.json()["arrival_day"] == 12
+
+    assert client.post("/api/v1/clients", json={**payload, "arrival_day": -1}).status_code == 422
+
+
+@pytest.mark.skip(reason="generator not implemented yet")
+def test_generate_creates_population_and_returns_summary() -> None: ...
+
+
+@pytest.mark.skip(reason="generator not implemented yet")
+def test_generate_twice_returns_409() -> None: ...
+
+
+def test_generate_unknown_run_returns_404() -> None:
+    res = client.post(f"/api/v1/simulation-runs/{FAKE_ID}/generate")
+    assert res.status_code == 404
 
 
 def test_simulation_run_rejects_non_positive_counts() -> None:

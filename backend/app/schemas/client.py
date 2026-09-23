@@ -19,6 +19,7 @@ class ClientBase(BaseModel):
   preferred_modality: str
   preferred_language: str
   urgency: ClientUrgency = Field(default=ClientUrgency.ROUTINE)
+  arrival_day: int | None = Field(default=None, ge=0)
   simulation_run_id: uuid.UUID | None = None
 
 

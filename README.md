@@ -27,7 +27,20 @@ Entities as they land, each with a SQLAlchemy model, Alembic migration, Pydantic
 - [x] `Client` (`/api/v1/clients`): state, insurance payer, needed specialties, preferred modality/language, urgency
 - [x] `WaitlistEntry` (`/api/v1/waitlist-entries`): tracks a client's wait, used to measure time-to-match
 - [x] `Match` (`/api/v1/matches`): a client/provider pairing, tagged with the strategy that produced it
-- [x] `SimulationRun` (`/api/v1/simulation-runs`): groups one experiment (seed and population size) so different strategies can be compared against the same synthetic population; clients and providers link to a run via `simulation_run_id`
+- [x] `SimulationRun` (`/api/v1/simulation-runs`): groups one experiment (scenario, seed, and population size) so different strategies can be compared against the same synthetic population; clients and providers link to a run via `simulation_run_id`
+
+## Synthetic data assumptions
+
+The generator's distributions are anchored to public data where any exists and flagged as assumptions where it doesn't. Every weight lives in `backend/app/simulation/config.py`.
+
+Anchored to public data:
+
+- State demand shares follow the [Census 2025 population estimates](https://www.census.gov/newsroom/press-releases/2026/population-growth-slows.html) for the eight modeled states.
+- Spanish-speaking provider supply (5.5%) follows [APA workforce data](https://www.apa.org/monitor/2018/06/spanish-speaking), set against a much larger Spanish-preferring client share.
+- Medicaid scarcity (roughly 17% of psychotherapists accept any public insurance) follows a [Georgia study](https://pmc.ncbi.nlm.nih.gov/articles/PMC11708982/). It covers one state, so it is a directional anchor rather than a national figure.
+- Payer demand ordering (Blue Cross plans largest, then UnitedHealthcare) follows [insurer market share reporting](https://medwave.io/2025/12/directory-health-insurance-companies/). The exact shares are estimates.
+
+Assumptions with no public source found: specialty demand and supply shares, provider modality mix, urgency mix, and the 0.9 demand to capacity ratio. That ratio is chosen so allocation decisions matter: near capacity, the matching strategy decides who goes unserved.
 
 ## Stack
 
@@ -83,8 +96,10 @@ Installs dependencies and starts the app at `http://localhost:3000`, calling the
 │   │   ├── api/        # Routers
 │   │   ├── core/       # Settings/config
 │   │   ├── db/         # Engine, session, declarative base
+│   │   ├── matching/   # Hard-constraint checks (strategies to come)
 │   │   ├── models/     # SQLAlchemy models
-│   │   └── schemas/    # Pydantic schemas
+│   │   ├── schemas/    # Pydantic schemas
+│   │   └── simulation/ # Synthetic population generator and scenarios
 │   ├── alembic/        # DB migrations
 │   └── tests/
 ├── docker-compose.yml  # Local Postgres

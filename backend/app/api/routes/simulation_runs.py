@@ -5,7 +5,12 @@ from sqlalchemy import select
 
 from app.api.deps import DbSession
 from app.models.simulation_run import SimulationRun
-from app.schemas.simulation_run import SimulationRunCreate, SimulationRunRead
+from app.schemas.simulation_run import (
+  PopulationSummary,
+  SimulationRunCreate,
+  SimulationRunRead,
+)
+from app.simulation.service import RunAlreadyGeneratedError, generate_for_run
 
 router = APIRouter(prefix="/simulation-runs", tags=["simulation-runs"])
 
@@ -30,3 +35,16 @@ def get_simulation_run(run_id: uuid.UUID, db: DbSession) -> SimulationRun:
   if run is None:
     raise HTTPException(status_code=404, detail="Simulation run not found")
   return run
+
+
+@router.post("/{run_id}/generate", response_model=PopulationSummary, status_code=201)
+def generate_simulation_run(run_id: uuid.UUID, db: DbSession) -> PopulationSummary:
+  run = db.get(SimulationRun, run_id)
+  if run is None:
+    raise HTTPException(status_code=404, detail="Simulation run not found")
+  try:
+    return generate_for_run(db, run)
+  except RunAlreadyGeneratedError:
+    raise HTTPException(
+      status_code=409, detail="Simulation run already has a generated population"
+    ) from None
