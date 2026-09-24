@@ -33,6 +33,11 @@ class ScoringWeights:
     language: float = 0.3
     modality: float = 0.2
 
+    def __post_init__(self) -> None:
+        weights = (self.specialty, self.language, self.modality)
+        if min(weights) < 0 or sum(weights) <= 0:
+            raise ValueError("weights must be non-negative and sum to more than zero")
+
 
 DEFAULT_WEIGHTS = ScoringWeights()
 
@@ -43,4 +48,15 @@ def score_pair(
     weights: ScoringWeights = DEFAULT_WEIGHTS,
 ) -> float:
     """Soft fit in [0, 1]: specialty overlap, language match, modality match."""
-    raise NotImplementedError
+    needs = set(client.needed_specialties)
+    specialty_fit = len(needs & set(provider.specialties)) / len(needs) if needs else 1.0
+    language_fit = 1.0 if client.preferred_language in provider.languages else 0.0
+    modality_fit = 1.0 if client.preferred_modality in provider.modalities else 0.0
+
+    total = weights.specialty + weights.language + weights.modality
+    weighted = (
+        weights.specialty * specialty_fit
+        + weights.language * language_fit
+        + weights.modality * modality_fit
+    )
+    return weighted / total

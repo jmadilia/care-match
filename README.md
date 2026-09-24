@@ -13,7 +13,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
 ## Status
 
 - [x] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
-- [ ] Matching engine v1: hard-constraint filtering + weighted scoring
+- [x] Matching engine v1: hard-constraint filtering + weighted scoring (`GET /api/v1/clients/{id}/candidates`)
 - [ ] Waitlist optimization: priority queue with aging + urgency escalation
 - [ ] Batch stable-matching pass (Gale-Shapley-style) vs. greedy assignment comparison
 - [ ] Marketplace simulation + evaluation metrics (time-to-match, fill rate, utilization variance)

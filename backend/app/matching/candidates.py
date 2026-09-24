@@ -2,8 +2,14 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.matching.constraints import ClientLike, ProviderLike
-from app.matching.scoring import DEFAULT_WEIGHTS, ScorableClient, ScorableProvider, ScoringWeights
+from app.matching.constraints import ClientLike, ProviderLike, is_eligible
+from app.matching.scoring import (
+    DEFAULT_WEIGHTS,
+    ScorableClient,
+    ScorableProvider,
+    ScoringWeights,
+    score_pair,
+)
 
 
 class RankableClient(ClientLike, ScorableClient, Protocol): ...
@@ -28,4 +34,11 @@ def rank_candidates[P: RankableProvider](
 
     Each input pair is (provider, remaining_capacity), so callers decide how load is tracked.
     """
-    raise NotImplementedError
+    candidates = [
+        Candidate(provider, score_pair(client, provider, weights), remaining)
+        for provider, remaining in providers
+        if remaining > 0 and is_eligible(client, provider)
+    ]
+    # The sort is stable, so full ties keep the caller's order.
+    candidates.sort(key=lambda candidate: (-candidate.score, -candidate.remaining_capacity))
+    return candidates
