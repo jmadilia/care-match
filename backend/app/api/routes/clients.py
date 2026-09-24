@@ -1,11 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
 from app.api.deps import DbSession
+from app.matching.service import recommend_candidates
 from app.models.client import Client
 from app.models.simulation_run import SimulationRun
+from app.schemas.candidate import CandidateRead
 from app.schemas.client import ClientCreate, ClientRead, ClientUpdate
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -40,6 +42,19 @@ def get_client(client_id: uuid.UUID, db: DbSession) -> Client:
   if client is None:
     raise HTTPException(status_code=404, detail="Client not found")
   return client
+
+
+@router.get("/{client_id}/candidates", response_model=list[CandidateRead])
+def list_candidates(
+  client_id: uuid.UUID,
+  db: DbSession,
+  strategy: str | None = None,
+  limit: int = Query(default=5, ge=1, le=50),
+) -> list[CandidateRead]:
+  client = db.get(Client, client_id)
+  if client is None:
+    raise HTTPException(status_code=404, detail="Client not found")
+  return recommend_candidates(db, client, strategy, limit)
 
 
 @router.patch("/{client_id}", response_model=ClientRead)
