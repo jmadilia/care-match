@@ -4,12 +4,15 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from app.api.deps import DbSession
+from app.matching.strategies.errors import StrategyAlreadyRunError
+from app.matching.strategies.greedy import run_greedy
 from app.models.simulation_run import SimulationRun
 from app.schemas.simulation_run import (
   PopulationSummary,
   SimulationRunCreate,
   SimulationRunRead,
 )
+from app.schemas.strategy_run import StrategyRunSummary
 from app.simulation.service import RunAlreadyGeneratedError, generate_for_run
 
 router = APIRouter(prefix="/simulation-runs", tags=["simulation-runs"])
@@ -47,4 +50,16 @@ def generate_simulation_run(run_id: uuid.UUID, db: DbSession) -> PopulationSumma
   except RunAlreadyGeneratedError:
     raise HTTPException(
       status_code=409, detail="Simulation run already has a generated population"
+    ) from None
+
+
+@router.post("/{run_id}/strategies/greedy", response_model=StrategyRunSummary, status_code=201)
+def run_greedy_strategy(run_id: uuid.UUID, db: DbSession) -> StrategyRunSummary:
+  if db.get(SimulationRun, run_id) is None:
+    raise HTTPException(status_code=404, detail="Simulation run not found")
+  try:
+    return run_greedy(db, run_id)
+  except StrategyAlreadyRunError:
+    raise HTTPException(
+      status_code=409, detail="greedy has already been run for this simulation run"
     ) from None
