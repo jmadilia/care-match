@@ -16,7 +16,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
 - [x] Matching engine v1: hard-constraint filtering + weighted scoring (`GET /api/v1/clients/{id}/candidates`)
 - [ ] Strategy comparison: greedy vs. batch stable matching (Gale-Shapley-style) vs. optimal assignment
   - [x] Greedy (`POST /api/v1/simulation-runs/{id}/strategies/greedy`): first-come-first-served by arrival order, no lookahead
-  - [ ] Batch stable matching
+  - [x] Batch stable matching (`POST /api/v1/simulation-runs/{id}/strategies/stable-matching`): client-proposing Gale-Shapley, providers rank clients by the same mutual fit score
   - [ ] Optimal assignment
 - [ ] Waitlist optimization: priority queue with aging + urgency escalation
 - [ ] Marketplace simulation + evaluation metrics (time-to-match, fill rate, utilization variance)
