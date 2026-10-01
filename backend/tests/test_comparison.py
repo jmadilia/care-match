@@ -18,6 +18,7 @@ def _run(
         fill_rate=fill_rate,
         mean_match_score=mean_score,
         provider_utilization_std=utilization_std,
+        fill_rate_by_urgency={"ROUTINE": fill_rate},
     )
 
 
@@ -65,16 +66,22 @@ def test_comparison_endpoint_returns_per_seed_and_aggregates(api: TestClient) ->
     body = res.json()
 
     assert body["scenario"] == "balanced"
-    assert len(body["per_seed"]) == 6  # 2 seeds x 3 strategies
+    assert len(body["per_seed"]) == 8  # 2 seeds x 4 strategies
     assert {row["strategy"] for row in body["per_seed"]} == {
         "greedy",
         "stable_matching",
         "optimal",
+        "waitlist_priority",
     }
     assert {row["seed"] for row in body["per_seed"]} == {1, 2}
 
-    assert len(body["aggregates"]) == 3
-    assert [a["strategy"] for a in body["aggregates"]] == ["greedy", "stable_matching", "optimal"]
+    assert len(body["aggregates"]) == 4
+    assert [a["strategy"] for a in body["aggregates"]] == [
+        "greedy",
+        "stable_matching",
+        "optimal",
+        "waitlist_priority",
+    ]
     for aggregate in body["aggregates"]:
         assert aggregate["runs"] == 2
 

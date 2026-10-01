@@ -8,6 +8,7 @@ from app.db.scratch import scratch_session
 from app.matching.strategies.greedy import run_greedy
 from app.matching.strategies.optimal import run_optimal
 from app.matching.strategies.stable_matching import run_stable_matching
+from app.matching.strategies.waitlist_priority import run_waitlist_priority
 from app.models.simulation_run import SimulationRun
 from app.schemas.comparison import (
   ComparisonRequest,
@@ -22,6 +23,7 @@ _STRATEGIES: list[Callable[[Session, uuid.UUID], StrategyRunSummary]] = [
   run_greedy,
   run_stable_matching,
   run_optimal,
+  run_waitlist_priority,
 ]
 
 
@@ -78,9 +80,18 @@ def _aggregate(per_seed: list[SeededStrategyRun]) -> list[StrategyAggregate]:
       mean_provider_utilization_std=round(
         statistics.mean(run.provider_utilization_std for run in runs), 4
       ),
+      mean_fill_rate_by_urgency=_mean_by_urgency(runs),
     )
     for strategy, runs in by_strategy.items()
   ]
+
+
+def _mean_by_urgency(runs: list[SeededStrategyRun]) -> dict[str, float]:
+  by_tier: dict[str, list[float]] = {}
+  for run in runs:
+    for tier, rate in run.fill_rate_by_urgency.items():
+      by_tier.setdefault(tier, []).append(rate)
+  return {tier: round(statistics.mean(rates), 4) for tier, rates in by_tier.items()}
 
 
 def _stdev(values: list[float]) -> float:

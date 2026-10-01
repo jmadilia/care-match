@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.matching.candidates import Candidate, rank_candidates
 from app.matching.strategies.errors import StrategyAlreadyRunError
-from app.matching.strategies.metrics import provider_utilization_std
+from app.matching.strategies.metrics import fill_rate_by_urgency, provider_utilization_std
 from app.models.client import Client
 from app.models.match import Match
 from app.models.provider import Provider
@@ -44,12 +44,12 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     db.scalars(
       select(Client)
       .where(Client.simulation_run_id == run_id)
-      .order_by(Client.arrival_day, Client.created_at)
+      .order_by(Client.arrival_day, Client.name)
     )
   )
   providers = list(
     db.scalars(
-      select(Provider).where(Provider.simulation_run_id == run_id).order_by(Provider.created_at)
+      select(Provider).where(Provider.simulation_run_id == run_id).order_by(Provider.name)
     )
   )
 
@@ -61,7 +61,6 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
   }
   next_choice = dict.fromkeys(preferences, 0)
   holds: dict[uuid.UUID, list[tuple[Client, float]]] = {provider.id: [] for provider in providers}
-  held_by: dict[uuid.UUID, uuid.UUID] = {}
   capacity = {provider.id: provider.weekly_capacity for provider in providers}
 
   free_clients = deque(client for client in clients if preferences[client.id])
@@ -77,13 +76,10 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
 
     if len(provider_holds) < capacity[candidate.provider.id]:
       provider_holds.append((client, candidate.score))
-      held_by[client.id] = candidate.provider.id
     elif candidate.score > provider_holds[-1][1]:
       bumped_client, _ = provider_holds[-1]
       provider_holds[-1] = (client, candidate.score)
-      del held_by[bumped_client.id]
       free_clients.append(bumped_client)
-      held_by[client.id] = candidate.provider.id
     else:
       free_clients.append(client)
       continue
@@ -92,6 +88,7 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
 
   matched_count = 0
   scores: list[float] = []
+  matched_client_ids: set[uuid.UUID] = set()
   for provider_id, provider_holds in holds.items():
     for client, score in provider_holds:
       db.add(
@@ -105,6 +102,7 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
       )
       matched_count += 1
       scores.append(score)
+      matched_client_ids.add(client.id)
 
   db.commit()
 
@@ -118,4 +116,5 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     fill_rate=round(matched_count / client_count, 4) if client_count else 0.0,
     mean_match_score=round(sum(scores) / len(scores), 4) if scores else 0.0,
     provider_utilization_std=provider_utilization_std(providers, matched_count_by_provider),
+    fill_rate_by_urgency=fill_rate_by_urgency(clients, matched_client_ids),
   )

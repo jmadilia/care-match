@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.matching.constraints import is_eligible
 from app.matching.scoring import score_pair
 from app.matching.strategies.errors import StrategyAlreadyRunError
-from app.matching.strategies.metrics import provider_utilization_std
+from app.matching.strategies.metrics import fill_rate_by_urgency, provider_utilization_std
 from app.models.client import Client
 from app.models.match import Match
 from app.models.provider import Provider
@@ -53,12 +53,12 @@ def run_optimal(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     db.scalars(
       select(Client)
       .where(Client.simulation_run_id == run_id)
-      .order_by(Client.arrival_day, Client.created_at)
+      .order_by(Client.arrival_day, Client.name)
     )
   )
   providers = list(
     db.scalars(
-      select(Provider).where(Provider.simulation_run_id == run_id).order_by(Provider.created_at)
+      select(Provider).where(Provider.simulation_run_id == run_id).order_by(Provider.name)
     )
   )
 
@@ -86,6 +86,7 @@ def run_optimal(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
   matched_count = 0
   scores: list[float] = []
   matched_count_by_provider: dict[uuid.UUID, int] = {}
+  matched_client_ids: set[uuid.UUID] = set()
   for row, col in zip(row_ind, col_ind, strict=True):
     if col >= total_real_slots:
       continue  # matched to a dummy column: stays unmatched
@@ -105,6 +106,7 @@ def run_optimal(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     matched_count += 1
     scores.append(score)
     matched_count_by_provider[provider.id] = matched_count_by_provider.get(provider.id, 0) + 1
+    matched_client_ids.add(client.id)
 
   db.commit()
 
@@ -116,4 +118,5 @@ def run_optimal(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     fill_rate=round(matched_count / client_count, 4) if client_count else 0.0,
     mean_match_score=round(sum(scores) / len(scores), 4) if scores else 0.0,
     provider_utilization_std=provider_utilization_std(providers, matched_count_by_provider),
+    fill_rate_by_urgency=fill_rate_by_urgency(clients, matched_client_ids),
   )

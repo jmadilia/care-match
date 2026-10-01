@@ -1,8 +1,23 @@
 import statistics
 import uuid
 from collections.abc import Mapping, Sequence
+from collections.abc import Set as AbstractSet
 
+from app.models.client import Client
 from app.models.provider import Provider
+
+
+def fill_rate_by_urgency(
+  clients: Sequence[Client], matched_client_ids: AbstractSet[uuid.UUID]
+) -> dict[str, float]:
+  """Fraction matched within each urgency tier. Scoring never looks at urgency, so a
+  strategy that doesn't specifically account for it will show roughly the same fill rate
+  across tiers regardless of how clinically urgent a client is.
+  """
+  by_tier: dict[str, list[bool]] = {}
+  for client in clients:
+    by_tier.setdefault(client.urgency, []).append(client.id in matched_client_ids)
+  return {tier: round(sum(matched) / len(matched), 4) for tier, matched in by_tier.items()}
 
 
 def provider_utilization_std(

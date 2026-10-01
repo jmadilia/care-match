@@ -18,8 +18,8 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
   - [x] Greedy (`POST /api/v1/simulation-runs/{id}/strategies/greedy`): first-come-first-served by arrival order, no lookahead
   - [x] Batch stable matching (`POST /api/v1/simulation-runs/{id}/strategies/stable-matching`): client-proposing Gale-Shapley, providers rank clients by the same mutual fit score
   - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
-- [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate and provider utilization variance with mean/stdev across seeds. Time-to-match is not covered yet, it needs simulated time passing, which is what waitlist optimization below will add.
-- [ ] Waitlist optimization: priority queue with aging + urgency escalation
+- [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate, provider utilization variance, and fill rate by urgency tier, with mean/stdev across seeds.
+- [x] Waitlist optimization (`POST /api/v1/simulation-runs/{id}/strategies/waitlist-priority`): a fourth strategy that simulates clients arriving over the run's horizon instead of treating the population as known up front; providers admit by priority (urgency plus days waited) rather than fit score, bumping a lower-priority holder when a higher-priority proposal arrives
 - [ ] Client intake + admin/ops dashboards (Next.js)
 
 ## Domain model
@@ -51,21 +51,25 @@ Assumptions with no public source found: the remaining specialty demand and supp
 
 From `POST /api/v1/comparisons` with the balanced scenario, 60 providers, 300 clients, averaged across 10 seeds (standard deviation in parentheses):
 
-| Strategy | Mean fill rate | Mean match score | Mean provider utilization stdev |
-|---|---|---|---|
-| Greedy | 85.7% (2.3%) | 0.865 (0.014) | 0.251 |
-| Stable matching | 83.1% (2.1%) | 0.889 (0.016) | 0.298 |
-| Optimal | 91.4% (2.0%) | 0.884 (0.010) | 0.211 |
+| Strategy | Mean fill rate | Mean match score | Mean provider utilization stdev | Fill rate: routine / elevated / urgent |
+|---|---|---|---|---|
+| Greedy | 85.7% (2.3%) | 0.865 (0.014) | 0.250 | 85.0% / 86.1% / 91.0% |
+| Stable matching | 83.0% (2.2%) | 0.889 (0.017) | 0.298 | 82.7% / 83.7% / 83.8% |
+| Optimal | 91.4% (2.0%) | 0.884 (0.010) | 0.211 | 91.1% / 91.9% / 93.7% |
+| Waitlist priority | 83.8% (2.4%) | 0.837 (0.010) | 0.295 | 80.3% / 93.8% / 95.5% |
 
 No strategy wins outright, each optimizes for something different:
 
-- Optimal serves the most clients and spreads load most evenly across providers, by accepting some lower-quality matches that the other two strategies leave on the table entirely rather than making at all.
-- Stable matching produces the best average match quality, at the cost of serving fewer clients and concentrating good matches on the providers everyone already prefers, the highest utilization variance of the three.
-- Greedy sits in between on every measure and needs no knowledge of the rest of the population to run, unlike the other two, which require the whole batch up front.
+- Optimal serves the most clients overall and spreads load most evenly across providers, by accepting some lower-quality matches that greedy and stable matching leave on the table entirely rather than making at all.
+- Stable matching produces the best average match quality, at the cost of serving fewer clients and concentrating good matches on the providers everyone already prefers, the highest utilization variance of the first three.
+- Greedy sits in between on every measure and needs no knowledge of the rest of the population to run, unlike the other three, which require the whole batch (or at least its arrival schedule) up front.
+- Waitlist priority is the only strategy where urgency actually changes outcomes. The other three score matches on specialty, language, and modality alone, never on `Client.urgency`, so their routine-to-urgent fill gap (6.0, 1.1, and 2.6 points) is incidental, not causal. Waitlist priority's gap is 15.2 points, bought by driving routine fill below every other strategy's: it is explicitly trading overall fill and average match quality for getting urgent and long-waiting clients served first.
 
-None of the three corresponds to how a real system would actually operate (clients arrive continuously, not as a known batch); that gap is what waitlist optimization is for.
+Only waitlist priority simulates clients arriving over time rather than treating the whole population as known up front, which is also the only reason `fill_rate_by_urgency` differs meaningfully between strategies: the other three have no mechanism that could respond to urgency even if they wanted to.
 
 Specialty fit is a soft score, not an eligibility constraint. Only state licensure and payer paneling decide who can serve whom. A scarce specialty therefore shows up as lower match quality rather than more unserved clients, and the population summary reports it as `mean_best_specialty_fit`.
+
+The table above is reproducible, not incidental: every strategy's client and provider queries tie-break on `name` rather than `created_at`. All rows in one bulk insert share the same transaction timestamp, so ordering by `created_at` alone let Postgres return ties in a different order on different queries, producing slightly different outcomes from the same seed. A regression test generates two separate populations from the same seed and checks every strategy returns an identical summary for both.
 
 The demand to capacity ratio of 1.0 was chosen empirically. Sweeping it from 0.7 to 1.25 on generated populations, the gap between a naive greedy pass and the best possible assignment peaked at 1.0 (about 7 points of clients served for first-fit greedy, 3 for a most-room greedy), so that is where the choice of strategy matters most.
 

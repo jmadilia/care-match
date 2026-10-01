@@ -8,6 +8,7 @@ from app.matching.strategies.errors import StrategyAlreadyRunError
 from app.matching.strategies.greedy import run_greedy
 from app.matching.strategies.optimal import run_optimal
 from app.matching.strategies.stable_matching import run_stable_matching
+from app.matching.strategies.waitlist_priority import run_waitlist_priority
 from app.models.simulation_run import SimulationRun
 from app.schemas.simulation_run import (
   PopulationSummary,
@@ -90,4 +91,18 @@ def run_optimal_strategy(run_id: uuid.UUID, db: DbSession) -> StrategyRunSummary
   except StrategyAlreadyRunError:
     raise HTTPException(
       status_code=409, detail="optimal has already been run for this simulation run"
+    ) from None
+
+
+@router.post(
+  "/{run_id}/strategies/waitlist-priority", response_model=StrategyRunSummary, status_code=201
+)
+def run_waitlist_priority_strategy(run_id: uuid.UUID, db: DbSession) -> StrategyRunSummary:
+  if db.get(SimulationRun, run_id) is None:
+    raise HTTPException(status_code=404, detail="Simulation run not found")
+  try:
+    return run_waitlist_priority(db, run_id)
+  except StrategyAlreadyRunError:
+    raise HTTPException(
+      status_code=409, detail="waitlist_priority has already been run for this simulation run"
     ) from None

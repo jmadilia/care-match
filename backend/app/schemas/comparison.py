@@ -23,6 +23,7 @@ class StrategyAggregate(BaseModel):
   mean_match_score_mean: float
   mean_match_score_std: float
   mean_provider_utilization_std: float
+  mean_fill_rate_by_urgency: dict[str, float]
 
 
 class ComparisonResult(BaseModel):

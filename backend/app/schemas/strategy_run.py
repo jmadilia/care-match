@@ -9,3 +9,4 @@ class StrategyRunSummary(BaseModel):
   fill_rate: float
   mean_match_score: float
   provider_utilization_std: float
+  fill_rate_by_urgency: dict[str, float]
