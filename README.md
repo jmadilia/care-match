@@ -20,7 +20,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
   - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
 - [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate, provider utilization variance, and fill rate by urgency tier, with mean/stdev across seeds.
 - [x] Waitlist optimization (`POST /api/v1/simulation-runs/{id}/strategies/waitlist-priority`): a fourth strategy that simulates clients arriving over the run's horizon instead of treating the population as known up front; providers admit by priority (urgency plus days waited) rather than fit score, bumping a lower-priority holder when a higher-priority proposal arrives
-- [ ] Client intake + admin/ops dashboards (Next.js)
+- [x] Client intake + admin/ops dashboards (Next.js): `/comparisons` turns the Results table above into an interactive, chart-driven comparison; `/intake` submits a client against an existing simulation run's provider pool and shows ranked candidates
 
 ## Domain model
 

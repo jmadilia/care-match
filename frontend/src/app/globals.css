@@ -3,6 +3,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Chart chrome (dataviz skill reference palette) */
+  --chart-surface: #fcfcfb;
+  --chart-text-primary: #0b0b0b;
+  --chart-text-secondary: #52514e;
+  --chart-text-muted: #898781;
+  --chart-gridline: #e1e0d9;
+  --chart-baseline: #c3c2b7;
+
+  /* Categorical series, one per strategy, fixed order (never reassigned by filtering) */
+  --series-greedy: #2a78d6;
+  --series-stable-matching: #eb6834;
+  --series-optimal: #1baf7a;
+  --series-waitlist-priority: #eda100;
 }
 
 @theme inline {
@@ -16,6 +30,18 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --chart-surface: #1a1a19;
+    --chart-text-primary: #ffffff;
+    --chart-text-secondary: #c3c2b7;
+    --chart-text-muted: #898781;
+    --chart-gridline: #2c2c2a;
+    --chart-baseline: #383835;
+
+    --series-greedy: #3987e5;
+    --series-stable-matching: #d95926;
+    --series-optimal: #199e70;
+    --series-waitlist-priority: #c98500;
   }
 }
 
