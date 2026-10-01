@@ -14,10 +14,10 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
 
 - [x] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
 - [x] Matching engine v1: hard-constraint filtering + weighted scoring (`GET /api/v1/clients/{id}/candidates`)
-- [ ] Strategy comparison: greedy vs. batch stable matching (Gale-Shapley-style) vs. optimal assignment
+- [x] Strategy comparison: greedy vs. batch stable matching (Gale-Shapley-style) vs. optimal assignment
   - [x] Greedy (`POST /api/v1/simulation-runs/{id}/strategies/greedy`): first-come-first-served by arrival order, no lookahead
   - [x] Batch stable matching (`POST /api/v1/simulation-runs/{id}/strategies/stable-matching`): client-proposing Gale-Shapley, providers rank clients by the same mutual fit score
-  - [ ] Optimal assignment
+  - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
 - [ ] Waitlist optimization: priority queue with aging + urgency escalation
 - [ ] Marketplace simulation + evaluation metrics (time-to-match, fill rate, utilization variance)
 - [ ] Client intake + admin/ops dashboards (Next.js)

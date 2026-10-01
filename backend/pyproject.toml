@@ -12,6 +12,7 @@ dependencies = [
     "psycopg[binary]>=3.3.6",
     "pydantic-settings>=2.15.0",
     "python-dotenv>=1.2.3",
+    "scipy>=1.18.1",
     "sqlalchemy>=2.0.54",
     "uvicorn[standard]>=0.53.0",
 ]
@@ -23,6 +24,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.16.8",
+    "scipy-stubs>=1.18.1.1",
 ]
 
 [tool.uv]
