@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     clients,
+    comparisons,
     health,
     matches,
     providers,
@@ -16,3 +17,4 @@ api_router.include_router(clients.router)
 api_router.include_router(matches.router)
 api_router.include_router(waitlist_entries.router)
 api_router.include_router(simulation_runs.router)
+api_router.include_router(comparisons.router)

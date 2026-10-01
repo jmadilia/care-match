@@ -18,8 +18,8 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
   - [x] Greedy (`POST /api/v1/simulation-runs/{id}/strategies/greedy`): first-come-first-served by arrival order, no lookahead
   - [x] Batch stable matching (`POST /api/v1/simulation-runs/{id}/strategies/stable-matching`): client-proposing Gale-Shapley, providers rank clients by the same mutual fit score
   - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
+- [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate and provider utilization variance with mean/stdev across seeds. Time-to-match is not covered yet, it needs simulated time passing, which is what waitlist optimization below will add.
 - [ ] Waitlist optimization: priority queue with aging + urgency escalation
-- [ ] Marketplace simulation + evaluation metrics (time-to-match, fill rate, utilization variance)
 - [ ] Client intake + admin/ops dashboards (Next.js)
 
 ## Domain model
@@ -46,6 +46,24 @@ Anchored to public data:
 Trauma demand is set so about 58% of clients list trauma among their needs, in line with a practitioner-reported estimate that 50 to 70% of active caseloads involve underlying trauma even when it is not the presenting issue. Public research supports high trauma prevalence among outpatient mental health clients ([Psychiatric Services](https://psychiatryonline.org/doi/10.1176/appi.ps.55.2.157), [Annals of General Psychiatry](https://annals-general-psychiatry.biomedcentral.com/articles/10.1186/s12991-019-0239-1)), but no exact caseload figure was found.
 
 Assumptions with no public source found: the remaining specialty demand and supply shares, provider modality mix, and urgency mix.
+
+## Results
+
+From `POST /api/v1/comparisons` with the balanced scenario, 60 providers, 300 clients, averaged across 10 seeds (standard deviation in parentheses):
+
+| Strategy | Mean fill rate | Mean match score | Mean provider utilization stdev |
+|---|---|---|---|
+| Greedy | 85.7% (2.3%) | 0.865 (0.014) | 0.251 |
+| Stable matching | 83.1% (2.1%) | 0.889 (0.016) | 0.298 |
+| Optimal | 91.4% (2.0%) | 0.884 (0.010) | 0.211 |
+
+No strategy wins outright, each optimizes for something different:
+
+- Optimal serves the most clients and spreads load most evenly across providers, by accepting some lower-quality matches that the other two strategies leave on the table entirely rather than making at all.
+- Stable matching produces the best average match quality, at the cost of serving fewer clients and concentrating good matches on the providers everyone already prefers, the highest utilization variance of the three.
+- Greedy sits in between on every measure and needs no knowledge of the rest of the population to run, unlike the other two, which require the whole batch up front.
+
+None of the three corresponds to how a real system would actually operate (clients arrive continuously, not as a known batch); that gap is what waitlist optimization is for.
 
 Specialty fit is a soft score, not an eligibility constraint. Only state licensure and payer paneling decide who can serve whom. A scarce specialty therefore shows up as lower match quality rather than more unserved clients, and the population summary reports it as `mean_best_specialty_fit`.
 
@@ -105,7 +123,8 @@ Installs dependencies and starts the app at `http://localhost:3000`, calling the
 │   │   ├── api/        # Routers
 │   │   ├── core/       # Settings/config
 │   │   ├── db/         # Engine, session, declarative base
-│   │   ├── matching/   # Hard-constraint checks (strategies to come)
+│   │   ├── evaluation/ # Multi-seed strategy comparison harness
+│   │   ├── matching/   # Eligibility, scoring, and the three strategies
 │   │   ├── models/     # SQLAlchemy models
 │   │   ├── schemas/    # Pydantic schemas
 │   │   └── simulation/ # Synthetic population generator and scenarios

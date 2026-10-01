@@ -8,3 +8,4 @@ class StrategyRunSummary(BaseModel):
   unmatched_count: int
   fill_rate: float
   mean_match_score: float
+  provider_utilization_std: float

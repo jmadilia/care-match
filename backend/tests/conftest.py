@@ -4,22 +4,16 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.db.session import engine, get_db
+from app.db.scratch import scratch_session
+from app.db.session import get_db
 from app.main import app
 
 
 @pytest.fixture
 def db_session() -> Generator[Session, None, None]:
     """A session whose work is rolled back at the end, so tests leave no rows behind."""
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = Session(bind=connection, join_transaction_mode="create_savepoint")
-    try:
+    with scratch_session() as session:
         yield session
-    finally:
-        session.close()
-        transaction.rollback()
-        connection.close()
 
 
 @pytest.fixture

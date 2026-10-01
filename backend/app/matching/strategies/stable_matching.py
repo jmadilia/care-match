@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.matching.candidates import Candidate, rank_candidates
 from app.matching.strategies.errors import StrategyAlreadyRunError
+from app.matching.strategies.metrics import provider_utilization_std
 from app.models.client import Client
 from app.models.match import Match
 from app.models.provider import Provider
@@ -108,6 +109,7 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
   db.commit()
 
   client_count = len(clients)
+  matched_count_by_provider = {provider_id: len(held) for provider_id, held in holds.items()}
   return StrategyRunSummary(
     strategy=STRATEGY_NAME,
     client_count=client_count,
@@ -115,4 +117,5 @@ def run_stable_matching(db: Session, run_id: uuid.UUID) -> StrategyRunSummary:
     unmatched_count=client_count - matched_count,
     fill_rate=round(matched_count / client_count, 4) if client_count else 0.0,
     mean_match_score=round(sum(scores) / len(scores), 4) if scores else 0.0,
+    provider_utilization_std=provider_utilization_std(providers, matched_count_by_provider),
   )
