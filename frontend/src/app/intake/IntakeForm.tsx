@@ -1,19 +1,26 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { SimulationRun, UrgencyTier } from "@/lib/api";
+import type { Scenario } from "@/lib/api";
 import { LANGUAGES, MODALITIES, PAYERS, SPECIALTIES, STATES } from "./vocabulary";
 
 export type IntakeValues = {
-  name: string;
+  scenario: Scenario;
+  seed: number;
   state: string;
   insurancePayer: string;
   neededSpecialties: string[];
   preferredModality: string;
   preferredLanguage: string;
-  urgency: UrgencyTier;
-  simulationRunId: string;
 };
+
+const SCENARIOS: { value: Scenario; label: string }[] = [
+  { value: "balanced", label: "Balanced" },
+  { value: "undersupplied_state", label: "Undersupplied state" },
+  { value: "scarce_specialty", label: "Scarce specialty" },
+];
+
+const MAX_SEED = 100000;
 
 const inputClass = "w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-2";
 const inputStyle = {
@@ -25,30 +32,26 @@ const labelClass = "text-xs";
 const labelStyle = { color: "var(--chart-text-secondary)" };
 
 export function IntakeForm({
-  runs,
   onSubmit,
   pending,
 }: {
-  runs: SimulationRun[];
   onSubmit: (values: IntakeValues) => void;
   pending: boolean;
 }) {
-  const [name, setName] = useState("");
+  const [scenario, setScenario] = useState<Scenario>("balanced");
+  const [seed, setSeed] = useState(1);
   const [state, setState] = useState<string>(STATES[0]);
   const [insurancePayer, setInsurancePayer] = useState<string>(PAYERS[0]);
   const [neededSpecialties, setNeededSpecialties] = useState<string[]>([SPECIALTIES[0]]);
   const [preferredModality, setPreferredModality] = useState<string>(MODALITIES[0]);
   const [preferredLanguage, setPreferredLanguage] = useState<string>(LANGUAGES[0]);
-  const [urgency, setUrgency] = useState<UrgencyTier>("ROUTINE");
-  const [simulationRunId, setSimulationRunId] = useState(runs[0]?.id ?? "");
 
-  const nameId = useId();
+  const scenarioId = useId();
+  const seedId = useId();
   const stateId = useId();
   const payerId = useId();
   const modalityId = useId();
   const languageId = useId();
-  const urgencyId = useId();
-  const runId = useId();
 
   function toggleSpecialty(specialty: string) {
     setNeededSpecialties((current) =>
@@ -63,51 +66,53 @@ export function IntakeForm({
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!name.trim() || neededSpecialties.length === 0 || !simulationRunId) return;
+        if (neededSpecialties.length === 0) return;
         onSubmit({
-          name,
+          scenario,
+          seed,
           state,
           insurancePayer,
           neededSpecialties,
           preferredModality,
           preferredLanguage,
-          urgency,
-          simulationRunId,
         });
       }}
     >
-      <div className="flex flex-col gap-1">
-        <label htmlFor={runId} className={labelClass} style={labelStyle}>
-          Match against provider pool from
-        </label>
-        <select
-          id={runId}
-          className={inputClass}
-          style={inputStyle}
-          value={simulationRunId}
-          onChange={(e) => setSimulationRunId(e.target.value)}
-        >
-          {runs.map((run) => (
-            <option key={run.id} value={run.id}>
-              {run.name} ({run.provider_count} providers, {run.scenario})
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1">
+          <label htmlFor={scenarioId} className={labelClass} style={labelStyle}>
+            Provider pool scenario
+          </label>
+          <select
+            id={scenarioId}
+            className={inputClass}
+            style={inputStyle}
+            value={scenario}
+            onChange={(e) => setScenario(e.target.value as Scenario)}
+          >
+            {SCENARIOS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor={nameId} className={labelClass} style={labelStyle}>
-          Name
-        </label>
-        <input
-          id={nameId}
-          className={inputClass}
-          style={inputStyle}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Jane Doe"
-          required
-        />
+        <div className="flex flex-col gap-1">
+          <label htmlFor={seedId} className={labelClass} style={labelStyle}>
+            Pool seed
+          </label>
+          <input
+            id={seedId}
+            type="number"
+            min={0}
+            max={MAX_SEED}
+            className={inputClass}
+            style={inputStyle}
+            value={seed}
+            onChange={(e) => setSeed(Number(e.target.value))}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -172,7 +177,7 @@ export function IntakeForm({
         </div>
       </fieldset>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
           <label htmlFor={modalityId} className={labelClass} style={labelStyle}>
             Modality
@@ -208,23 +213,6 @@ export function IntakeForm({
                 {l}
               </option>
             ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor={urgencyId} className={labelClass} style={labelStyle}>
-            Urgency
-          </label>
-          <select
-            id={urgencyId}
-            className={inputClass}
-            style={inputStyle}
-            value={urgency}
-            onChange={(e) => setUrgency(e.target.value as UrgencyTier)}
-          >
-            <option value="ROUTINE">Routine</option>
-            <option value="ELEVATED">Elevated</option>
-            <option value="URGENT">Urgent</option>
           </select>
         </div>
       </div>

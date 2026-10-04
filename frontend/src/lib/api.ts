@@ -53,63 +53,25 @@ export async function runComparison(request: ComparisonRequest): Promise<Compari
     body: JSON.stringify(request),
   });
   if (!res.ok) {
-    throw new Error(await describeComparisonError(res));
+    throw new Error(await describeApiError(res, "Comparison"));
   }
   return res.json();
 }
 
 // FastAPI validation failures arrive as { detail: [{ msg }] }; show the messages
 // instead of the raw JSON.
-async function describeComparisonError(res: Response): Promise<string> {
+async function describeApiError(res: Response, what: string): Promise<string> {
   const text = await res.text();
   try {
     const body = JSON.parse(text);
     if (Array.isArray(body.detail)) {
       const messages = body.detail.map((d: { msg: string }) => d.msg).join("; ");
-      return `Comparison rejected: ${messages}`;
+      return `${what} rejected: ${messages}`;
     }
   } catch {
     // Not JSON, fall through to the raw text.
   }
-  return `Comparison failed (${res.status}): ${text}`;
-}
-
-export type Client = {
-  id: string;
-  name: string;
-  state: string;
-  insurance_payer: string;
-  needed_specialties: string[];
-  preferred_modality: string;
-  preferred_language: string;
-  urgency: UrgencyTier;
-  arrival_day: number | null;
-  simulation_run_id: string | null;
-  created_at: string;
-};
-
-export type ClientCreate = {
-  name: string;
-  state: string;
-  insurance_payer: string;
-  needed_specialties: string[];
-  preferred_modality: string;
-  preferred_language: string;
-  urgency?: UrgencyTier;
-  simulation_run_id?: string | null;
-};
-
-export async function createClient(input: ClientCreate): Promise<Client> {
-  const res = await fetch(`${API_URL}/api/v1/clients`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Failed to create client (${res.status}): ${detail}`);
-  }
-  return res.json();
+  return `${what} failed (${res.status}): ${text}`;
 }
 
 export type Provider = {
@@ -121,8 +83,6 @@ export type Provider = {
   languages: string[];
   insurance_panels: string[];
   weekly_capacity: number;
-  simulation_run_id: string | null;
-  created_at: string;
 };
 
 export type Candidate = {
@@ -131,60 +91,34 @@ export type Candidate = {
   remaining_capacity: number;
 };
 
-export async function getCandidates(clientId: string, limit = 5): Promise<Candidate[]> {
-  const res = await fetch(
-    `${API_URL}/api/v1/clients/${clientId}/candidates?limit=${limit}`,
-  );
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Failed to fetch candidates (${res.status}): ${detail}`);
-  }
-  return res.json();
-}
-
-export type SimulationRun = {
-  id: string;
-  name: string;
+export type IntakeRequest = {
   scenario: Scenario;
   seed: number;
-  provider_count: number;
-  client_count: number;
-  created_at: string;
+  state: string;
+  insurance_payer: string;
+  needed_specialties: string[];
+  preferred_modality: string;
+  preferred_language: string;
+  limit?: number;
 };
 
-export async function listSimulationRuns(): Promise<SimulationRun[]> {
-  const res = await fetch(`${API_URL}/api/v1/simulation-runs`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to fetch simulation runs: ${res.status}`);
-  return res.json();
-}
-
-export type SimulationRunCreate = {
-  name: string;
-  scenario?: Scenario;
+export type IntakeResult = {
+  scenario: Scenario;
   seed: number;
-  provider_count: number;
-  client_count: number;
+  pool_provider_count: number;
+  candidates: Candidate[];
 };
 
-export async function createSimulationRun(input: SimulationRunCreate): Promise<SimulationRun> {
-  const res = await fetch(`${API_URL}/api/v1/simulation-runs`, {
+// Stateless: the backend regenerates the provider pool from (scenario, seed), ranks it for
+// these answers, and discards it. Nothing is stored.
+export async function findIntakeCandidates(request: IntakeRequest): Promise<IntakeResult> {
+  const res = await fetch(`${API_URL}/api/v1/intake`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
+    body: JSON.stringify(request),
   });
   if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Failed to create simulation run (${res.status}): ${detail}`);
+    throw new Error(await describeApiError(res, "Intake"));
   }
   return res.json();
-}
-
-export async function generateSimulationRun(runId: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/v1/simulation-runs/${runId}/generate`, {
-    method: "POST",
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Failed to generate population (${res.status}): ${detail}`);
-  }
 }

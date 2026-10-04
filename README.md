@@ -9,7 +9,7 @@ A therapist-client matching and waitlist optimization engine: an original take o
   <img alt="The strategy comparison page: fill rate by strategy, fill rate by urgency tier, and a results table for greedy, stable matching, optimal, and waitlist priority" src="docs/comparison-light.png" width="640">
 </picture>
 
-Two pages in the Next.js app make this explorable: `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` submits a client against a provider pool and shows their ranked candidates.
+Two pages in the Next.js app make this explorable: `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` ranks a generated provider pool for a client's answers. Neither page stores anything: both regenerate their data from a seed per request and roll it back.
 
 ## Why this exists
 
@@ -29,7 +29,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
   - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
 - [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate, provider utilization variance, and fill rate by urgency tier, with mean/stdev across seeds. Requests are capped (10 seeds, 200 providers, 1,000 clients, and seeds times clients up to 5,000) so a public endpoint can't be asked for unbounded work. Because every strategy is deterministic for a seed, results are cached exactly rather than approximately: the default run (the one in the Results table) is served from a committed snapshot, and any other request is computed once and kept in a small in-memory LRU.
 - [x] Waitlist optimization (`POST /api/v1/simulation-runs/{id}/strategies/waitlist-priority`): a fourth strategy that simulates clients arriving over the run's horizon instead of treating the population as known up front; providers admit by priority (urgency plus days waited) rather than fit score, bumping a lower-priority holder when a higher-priority proposal arrives
-- [x] Client intake + admin/ops dashboards (Next.js): `/comparisons` turns the Results table above into an interactive, chart-driven comparison; `/intake` submits a client against an existing simulation run's provider pool and shows ranked candidates
+- [x] Client intake + admin/ops dashboards (Next.js): `/comparisons` turns the Results table above into an interactive, chart-driven comparison; `/intake` (`POST /api/v1/intake`) generates a provider pool from a scenario and seed, ranks it for the client's answers, and discards it, so a visitor never writes a row
 
 ## Domain model
 
@@ -136,6 +136,14 @@ cd frontend && cp .env.example .env && cd ..
 ```
 
 Installs dependencies and starts the app at `http://localhost:3000`, calling the backend via `NEXT_PUBLIC_API_URL`.
+
+## Deploying
+
+The public API is deliberately small. With `ENVIRONMENT=production` and no other flags, the backend mounts only `GET /api/v1/health`, `POST /api/v1/comparisons`, and `POST /api/v1/intake`. The CRUD and strategy-run routers (`/providers`, `/clients`, `/matches`, `/waitlist-entries`, `/simulation-runs`) are not mounted at all, so they return 404 rather than relying on authentication to stay closed. Locally (`ENVIRONMENT=local`, the default) everything is mounted.
+
+To keep the admin API on in a deployed environment, set `ADMIN_API_ENABLED=true` and `ADMIN_API_KEY`; requests then need an `X-Admin-Key` header, and the app refuses to start if the admin API is enabled outside local without a key.
+
+The database needs only the schema (`cd backend && uv run alembic upgrade head`) and no seed data: comparisons and intake generate their populations from a seed per request and roll everything back. Also set `DATABASE_URL`, `BACKEND_CORS_ORIGINS` (the frontend's origin), and, for the frontend, `NEXT_PUBLIC_API_URL`.
 
 ## Project layout
 
