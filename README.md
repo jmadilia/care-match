@@ -143,15 +143,17 @@ The public API is deliberately small. With `ENVIRONMENT=production` and no other
 
 To keep the admin API on in a deployed environment, set `ADMIN_API_ENABLED=true` and `ADMIN_API_KEY`; requests then need an `X-Admin-Key` header, and the app refuses to start if the admin API is enabled outside local without a key.
 
-The database needs only the schema (`cd backend && uv run alembic upgrade head`) and no seed data: comparisons and intake generate their populations from a seed per request and roll everything back. Also set `DATABASE_URL`, `BACKEND_CORS_ORIGINS` (the frontend's origin), and, for the frontend, `NEXT_PUBLIC_API_URL`.
+The database needs only the schema (`cd backend && uv run alembic upgrade head`) and no seed data: comparisons and intake generate their populations from a seed per request and roll everything back. Also set `DATABASE_URL`. If the frontend is served from a different origin than the API, set `BACKEND_CORS_ORIGINS` and the frontend's `NEXT_PUBLIC_API_URL` as well; the Vercel setup below doesn't need either.
 
 ### On Vercel
 
-The frontend and backend deploy as two Vercel projects from this one repository, with a Neon database added through the Vercel Marketplace.
+The frontend and backend deploy as two [Vercel Services](https://vercel.com/docs/services) of a single project, defined by the `vercel.json` at the repository root: `frontend/` is served at `/`, and the FastAPI app in `backend/` receives everything under `/api`. Because both live on one domain, the frontend calls the API with relative URLs. There is no `NEXT_PUBLIC_API_URL`, no CORS configuration, and no deploy-order step. Services is in Beta, and I have only exercised this layout with `vercel dev` locally.
 
 1. **Database.** Add Neon from the Marketplace. Run the migrations once from your machine against its direct (unpooled) connection string: `cd backend && DATABASE_URL="<direct connection string>" uv run alembic upgrade head`. Hosted providers hand out `postgres://` or `postgresql://` URLs; the settings rewrite them to the `postgresql+psycopg://` form SQLAlchemy needs.
-2. **Backend project.** Import the repository with Root Directory `backend`. Vercel finds the FastAPI `app` in `app/main.py`, installs from `pyproject.toml` and `uv.lock`, and reads `backend/vercel.json`, which sets the function's `maxDuration` and leaves the tests out of the bundle. Set `ENVIRONMENT=production`, `DATABASE_URL` to Neon's pooled connection string, and `BACKEND_CORS_ORIGINS` to the frontend's URL.
-3. **Frontend project.** Import the same repository with Root Directory `frontend` and set `NEXT_PUBLIC_API_URL` to the backend project's URL. Deploy the backend first to get that URL, then add the frontend's URL to `BACKEND_CORS_ORIGINS` and redeploy the backend.
+2. **Project.** Import the repository with the Root Directory left at the repository root. If the dashboard asks for a framework preset, choose the Services option. Vercel finds the FastAPI `app` in `backend/app/main.py`, installs from `pyproject.toml` and `uv.lock`, and applies the `maxDuration` and the test-file exclusion from the service's `functions` entry.
+3. **Environment variables.** Set `ENVIRONMENT=production` and `DATABASE_URL` to Neon's pooled connection string.
+
+To try the same layout locally, run `npx vercel dev -L` from the repository root.
 
 Outside local the engine opens no connection pool (the database's own pooler does that job) and turns off prepared statements, which a transaction-mode pooler can't carry between requests. The default comparison is served from the committed snapshot, so it costs almost no compute. Any other comparison is computed live, up to about a minute on a laptop; `maxDuration` is set to 180 seconds as a starting point, since serverless CPUs may be slower, and should be tuned after measuring a real deployment. The in-memory cache for those custom comparisons is per function instance, so it is best-effort there.
 

@@ -39,3 +39,7 @@ backend/.coverage
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- Vercel ---
+.vercel/
+backend/.vercel/

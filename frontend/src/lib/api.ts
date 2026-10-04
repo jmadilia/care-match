@@ -1,6 +1,10 @@
-// 127.0.0.1 (not "localhost") avoids Node's fetch trying an IPv6 route to a
-// backend that only listens on IPv4.
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+// In production the frontend and API are services of one Vercel project on one domain, so the
+// default is a relative URL. Locally the API runs separately on :8000, addressed as 127.0.0.1
+// (not "localhost") so Node's fetch doesn't try an IPv6 route to a backend that only listens
+// on IPv4.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:8000");
 
 export type Scenario = "balanced" | "undersupplied_state" | "scarce_specialty";
 
