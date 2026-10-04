@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next.js + FastAPI Template",
-  description: "Next.js + TypeScript + Tailwind frontend, FastAPI + PostgreSQL backend.",
+  title: "Care Match",
+  description:
+    "Therapist-client matching and waitlist optimization engine, compared across four strategies on synthetic data.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

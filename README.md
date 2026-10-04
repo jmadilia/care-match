@@ -2,15 +2,24 @@
 
 A therapist-client matching and waitlist optimization engine: an original take on the hardest problem underneath any telehealth marketplace, which is pairing a client with the right available provider, fast, without a licensure, insurance-panel, or capacity constraint silently producing a bad match.
 
+**The headline result.** Four matching strategies run against identical synthetic populations (60 providers, 300 clients, 10 seeds). Optimal assignment serves the most clients (91.4%) and balances provider load best, but only one strategy, waitlist priority, lets clinical urgency change who gets served: it fills 95.5% of urgent clients versus 80.3% of routine ones, a 15.2-point gap, while the other three show gaps of 1 to 6 points that are incidental, since they never look at urgency at all. Every number is reproducible from a seed. Full results and the tradeoffs behind them are in [Results](#results).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/comparison-dark.png">
+  <img alt="The strategy comparison page: fill rate by strategy, fill rate by urgency tier, and a results table for greedy, stable matching, optimal, and waitlist priority" src="docs/comparison-light.png" width="640">
+</picture>
+
+Two pages in the Next.js app make this explorable: `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` submits a client against a provider pool and shows their ranked candidates.
+
 ## Why this exists
 
 Telehealth marketplaces all sit on top of the same hard problem: providers are a constrained, unevenly distributed resource (licensed only in certain states, paneled with only certain insurers, with a hard weekly capacity), and clients arrive with a mix of hard constraints (insurance, state, timezone) and soft preferences (specialty, modality, language, cultural fit). Naive filter-and-pick-first matching ignores marketplace-level effects: some providers get overloaded while others sit idle, and clients wait longer than they need to.
 
-This project treats matching as a two-sided marketplace optimization problem rather than a lookup query. It builds a synthetic provider/client marketplace and compares several matching strategies, including rule-based filtering, greedy ranked assignment, and a stable-matching/optimization-based approach, against simulated demand, evaluating them on time-to-first-appointment, fill rate, and provider utilization balance.
+This project treats matching as a two-sided marketplace optimization problem rather than a lookup query. It builds a synthetic provider/client marketplace and compares four matching strategies against the same simulated demand: greedy first-come-first-served, batch stable matching, globally optimal assignment, and a waitlist strategy that admits by urgency and time waited. They are evaluated on fill rate, match quality, provider utilization balance, and fill rate by urgency tier.
 
 This is a portfolio project built on synthetic data. It isn't modeled on, or affiliated with, any specific company's internal systems.
 
-## Status
+## What's built
 
 - [x] Synthetic provider/client data generator (state, insurance panel, specialty, capacity, preferences)
 - [x] Matching engine v1: hard-constraint filtering + weighted scoring (`GET /api/v1/clients/{id}/candidates`)
@@ -28,7 +37,7 @@ Entities as they land, each with a SQLAlchemy model, Alembic migration, Pydantic
 
 - [x] `Provider` (`/api/v1/providers`): license states, specialties, modalities, languages, insurance panels, weekly capacity
 - [x] `Client` (`/api/v1/clients`): state, insurance payer, needed specialties, preferred modality/language, urgency
-- [x] `WaitlistEntry` (`/api/v1/waitlist-entries`): tracks a client's wait, used to measure time-to-match
+- [x] `WaitlistEntry` (`/api/v1/waitlist-entries`): records a client's path through the waitlist strategy (waiting, matched, or expired) with a resolution timestamp
 - [x] `Match` (`/api/v1/matches`): a client/provider pairing, tagged with the strategy that produced it
 - [x] `SimulationRun` (`/api/v1/simulation-runs`): groups one experiment (scenario, seed, and population size) so different strategies can be compared against the same synthetic population; clients and providers link to a run via `simulation_run_id`
 
@@ -55,7 +64,7 @@ From `POST /api/v1/comparisons` with the balanced scenario, 60 providers, 300 cl
 |---|---|---|---|---|
 | Greedy | 85.7% (2.3%) | 0.865 (0.014) | 0.250 | 85.0% / 86.1% / 91.0% |
 | Stable matching | 83.0% (2.2%) | 0.889 (0.017) | 0.298 | 82.7% / 83.7% / 83.8% |
-| Optimal | 91.4% (2.0%) | 0.884 (0.010) | 0.211 | 91.1% / 91.9% / 93.7% |
+| Optimal | 91.4% (2.0%) | 0.884 (0.009) | 0.211 | 91.1% / 91.9% / 93.7% |
 | Waitlist priority | 83.8% (2.4%) | 0.837 (0.010) | 0.295 | 80.3% / 93.8% / 95.5% |
 
 No strategy wins outright, each optimizes for something different:
