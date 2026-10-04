@@ -82,6 +82,20 @@ The table above is reproducible, not incidental: every strategy's client and pro
 
 The demand to capacity ratio of 1.0 was chosen empirically. Sweeping it from 0.7 to 1.25 on generated populations, the gap between a naive greedy pass and the best possible assignment peaked at 1.0 (about 7 points of clients served for first-fit greedy, 3 for a most-room greedy), so that is where the choice of strategy matters most.
 
+## Limitations
+
+What these results do and do not show:
+
+- **Synthetic data.** Every population is generated. Distributions are anchored to public data where any exists and flagged as assumptions where it doesn't (see above), so the results describe this modeled marketplace, not a real one. The relative ordering of strategies is the finding; the absolute fill rates depend on choices like the 1.0 demand to capacity ratio and may not carry over.
+- **One scenario, one scale.** The Results table covers the balanced scenario at 60 providers and 300 clients over 10 seeds. The other two scenarios exist but are not reported here, scale effects are not studied, and spread across seeds is shown as a standard deviation without significance tests.
+- **Capacity never renews.** A provider's `weekly_capacity` is a one-time pool for the whole run. There is no treatment duration, no clients finishing care, no no-shows or churn, and matches are never accepted or declined. That is why time-to-match is not reported: the waitlist strategy simulates arrivals over a 28 day horizon, but no slot ever frees up.
+- **Tuned, not fitted.** The scoring weights (specialty 0.5, language 0.3, modality 0.2) and the waitlist urgency baselines and aging rate (0, 3, 7 points plus 0.5 per day waited) are chosen to tell a clear story, not fitted to outcomes, and their sensitivity is not explored. A high fit score means overlap on specialty, language, and modality, which is not evidence of a better therapeutic outcome.
+- **Provider preferences are assumed.** Stable matching has providers rank clients by the same fit score clients use, because no real provider preferences are modeled, so "stable" is relative to that shared ranking.
+- **Optimal is a batch ceiling.** It needs the whole population up front and maximizes total score, which says nothing about fairness or wait time. No real system could run it as clients arrive one at a time.
+- **Narrow eligibility.** Only state licensure and insurance paneling are hard constraints. There is no scheduling, timezone, plan-level coverage, or clinician credential model.
+- **No equity analysis.** The generator makes Medicaid coverage and Spanish-speaking providers scarce, but results are not broken out by payer or language, so whether those clients fare worse under each strategy is not measured. Fill rate by urgency tier is the only subgroup view.
+- **Not a clinical or production system.** Urgency tiers here are a modeling input, not triage; real urgent or crisis cases need human clinical workflows. The API has no authentication and nothing is built for protected health information.
+
 ## Stack
 
 - **Frontend**: Next.js (App Router), TypeScript, Tailwind CSS, ESLint, pnpm
