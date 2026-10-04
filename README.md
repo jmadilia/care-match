@@ -27,7 +27,7 @@ This is a portfolio project built on synthetic data. It isn't modeled on, or aff
   - [x] Greedy (`POST /api/v1/simulation-runs/{id}/strategies/greedy`): first-come-first-served by arrival order, no lookahead
   - [x] Batch stable matching (`POST /api/v1/simulation-runs/{id}/strategies/stable-matching`): client-proposing Gale-Shapley, providers rank clients by the same mutual fit score
   - [x] Optimal assignment (`POST /api/v1/simulation-runs/{id}/strategies/optimal`): Hungarian algorithm (scipy) maximizing total match score across the whole batch
-- [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate, provider utilization variance, and fill rate by urgency tier, with mean/stdev across seeds.
+- [x] Comparison harness + evaluation metrics (`POST /api/v1/comparisons`): runs every strategy against the same population per seed; reports fill rate, provider utilization variance, and fill rate by urgency tier, with mean/stdev across seeds. Requests are capped (10 seeds, 200 providers, 1,000 clients, and seeds times clients up to 5,000) so a public endpoint can't be asked for unbounded work. Because every strategy is deterministic for a seed, results are cached exactly rather than approximately: the default run (the one in the Results table) is served from a committed snapshot, and any other request is computed once and kept in a small in-memory LRU.
 - [x] Waitlist optimization (`POST /api/v1/simulation-runs/{id}/strategies/waitlist-priority`): a fourth strategy that simulates clients arriving over the run's horizon instead of treating the population as known up front; providers admit by priority (urgency plus days waited) rather than fit score, bumping a lower-priority holder when a higher-priority proposal arrives
 - [x] Client intake + admin/ops dashboards (Next.js): `/comparisons` turns the Results table above into an interactive, chart-driven comparison; `/intake` submits a client against an existing simulation run's provider pool and shows ranked candidates
 
@@ -173,3 +173,4 @@ Installs dependencies and starts the app at `http://localhost:3000`, calling the
 | Type-check backend | `cd backend && uv run mypy app` |
 | Lint frontend | `cd frontend && pnpm lint` |
 | Build frontend | `cd frontend && pnpm build` |
+| Regenerate the default comparison snapshot (after changing a strategy, the generator, or scoring) | `cd backend && uv run python -m app.evaluation.snapshot` |

@@ -53,10 +53,25 @@ export async function runComparison(request: ComparisonRequest): Promise<Compari
     body: JSON.stringify(request),
   });
   if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Comparison failed (${res.status}): ${detail}`);
+    throw new Error(await describeComparisonError(res));
   }
   return res.json();
+}
+
+// FastAPI validation failures arrive as { detail: [{ msg }] }; show the messages
+// instead of the raw JSON.
+async function describeComparisonError(res: Response): Promise<string> {
+  const text = await res.text();
+  try {
+    const body = JSON.parse(text);
+    if (Array.isArray(body.detail)) {
+      const messages = body.detail.map((d: { msg: string }) => d.msg).join("; ");
+      return `Comparison rejected: ${messages}`;
+    }
+  } catch {
+    // Not JSON, fall through to the raw text.
+  }
+  return `Comparison failed (${res.status}): ${text}`;
 }
 
 export type Client = {

@@ -1,0 +1,677 @@
+{
+  "scenario": "balanced",
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "provider_count": 60,
+  "client_count": 300,
+  "per_seed": [
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 255,
+      "unmatched_count": 45,
+      "fill_rate": 0.85,
+      "mean_match_score": 0.8886,
+      "provider_utilization_std": 0.2356,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8219,
+        "URGENT": 0.963,
+        "ELEVATED": 0.9074
+      },
+      "seed": 1
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 241,
+      "unmatched_count": 59,
+      "fill_rate": 0.8033,
+      "mean_match_score": 0.9062,
+      "provider_utilization_std": 0.3226,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7717,
+        "URGENT": 0.8889,
+        "ELEVATED": 0.8889
+      },
+      "seed": 1
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 281,
+      "unmatched_count": 19,
+      "fill_rate": 0.9367,
+      "mean_match_score": 0.8821,
+      "provider_utilization_std": 0.1776,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9178,
+        "URGENT": 1.0,
+        "ELEVATED": 0.9815
+      },
+      "seed": 1
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 254,
+      "unmatched_count": 46,
+      "fill_rate": 0.8467,
+      "mean_match_score": 0.8487,
+      "provider_utilization_std": 0.29,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7945,
+        "URGENT": 1.0,
+        "ELEVATED": 0.9815
+      },
+      "seed": 1
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 258,
+      "unmatched_count": 42,
+      "fill_rate": 0.86,
+      "mean_match_score": 0.8596,
+      "provider_utilization_std": 0.2474,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8678,
+        "ELEVATED": 0.82,
+        "URGENT": 0.8696
+      },
+      "seed": 2
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 251,
+      "unmatched_count": 49,
+      "fill_rate": 0.8367,
+      "mean_match_score": 0.8843,
+      "provider_utilization_std": 0.2978,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8326,
+        "ELEVATED": 0.84,
+        "URGENT": 0.8696
+      },
+      "seed": 2
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 274,
+      "unmatched_count": 26,
+      "fill_rate": 0.9133,
+      "mean_match_score": 0.8838,
+      "provider_utilization_std": 0.2048,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9295,
+        "ELEVATED": 0.86,
+        "URGENT": 0.8696
+      },
+      "seed": 2
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 253,
+      "unmatched_count": 47,
+      "fill_rate": 0.8433,
+      "mean_match_score": 0.8321,
+      "provider_utilization_std": 0.2903,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8238,
+        "ELEVATED": 0.9,
+        "URGENT": 0.913
+      },
+      "seed": 2
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 260,
+      "unmatched_count": 40,
+      "fill_rate": 0.8667,
+      "mean_match_score": 0.8431,
+      "provider_utilization_std": 0.2433,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8393,
+        "ELEVATED": 0.9444,
+        "URGENT": 0.9545
+      },
+      "seed": 3
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 262,
+      "unmatched_count": 38,
+      "fill_rate": 0.8733,
+      "mean_match_score": 0.8529,
+      "provider_utilization_std": 0.2585,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8616,
+        "ELEVATED": 0.9259,
+        "URGENT": 0.8636
+      },
+      "seed": 3
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 275,
+      "unmatched_count": 25,
+      "fill_rate": 0.9167,
+      "mean_match_score": 0.881,
+      "provider_utilization_std": 0.1981,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9062,
+        "ELEVATED": 0.9444,
+        "URGENT": 0.9545
+      },
+      "seed": 3
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 255,
+      "unmatched_count": 45,
+      "fill_rate": 0.85,
+      "mean_match_score": 0.8211,
+      "provider_utilization_std": 0.281,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8036,
+        "ELEVATED": 0.9815,
+        "URGENT": 1.0
+      },
+      "seed": 3
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 252,
+      "unmatched_count": 48,
+      "fill_rate": 0.84,
+      "mean_match_score": 0.855,
+      "provider_utilization_std": 0.271,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8293,
+        "ELEVATED": 0.8657,
+        "URGENT": 0.8571
+      },
+      "seed": 4
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 246,
+      "unmatched_count": 54,
+      "fill_rate": 0.82,
+      "mean_match_score": 0.8967,
+      "provider_utilization_std": 0.3183,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8098,
+        "ELEVATED": 0.8507,
+        "URGENT": 0.8214
+      },
+      "seed": 4
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 268,
+      "unmatched_count": 32,
+      "fill_rate": 0.8933,
+      "mean_match_score": 0.8879,
+      "provider_utilization_std": 0.2633,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8976,
+        "ELEVATED": 0.8955,
+        "URGENT": 0.8571
+      },
+      "seed": 4
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 245,
+      "unmatched_count": 55,
+      "fill_rate": 0.8167,
+      "mean_match_score": 0.8414,
+      "provider_utilization_std": 0.3109,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7707,
+        "ELEVATED": 0.9254,
+        "URGENT": 0.8929
+      },
+      "seed": 4
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 249,
+      "unmatched_count": 51,
+      "fill_rate": 0.83,
+      "mean_match_score": 0.87,
+      "provider_utilization_std": 0.3155,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8304,
+        "ELEVATED": 0.766,
+        "URGENT": 0.9565
+      },
+      "seed": 5
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 241,
+      "unmatched_count": 59,
+      "fill_rate": 0.8033,
+      "mean_match_score": 0.8947,
+      "provider_utilization_std": 0.3318,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7913,
+        "ELEVATED": 0.8085,
+        "URGENT": 0.913
+      },
+      "seed": 5
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 271,
+      "unmatched_count": 29,
+      "fill_rate": 0.9033,
+      "mean_match_score": 0.8779,
+      "provider_utilization_std": 0.2267,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8913,
+        "ELEVATED": 0.9149,
+        "URGENT": 1.0
+      },
+      "seed": 5
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 239,
+      "unmatched_count": 61,
+      "fill_rate": 0.7967,
+      "mean_match_score": 0.8285,
+      "provider_utilization_std": 0.3521,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7478,
+        "ELEVATED": 0.9362,
+        "URGENT": 1.0
+      },
+      "seed": 5
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 253,
+      "unmatched_count": 47,
+      "fill_rate": 0.8433,
+      "mean_match_score": 0.8512,
+      "provider_utilization_std": 0.2912,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8481,
+        "ELEVATED": 0.8222,
+        "URGENT": 0.8333
+      },
+      "seed": 6
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 244,
+      "unmatched_count": 56,
+      "fill_rate": 0.8133,
+      "mean_match_score": 0.8713,
+      "provider_utilization_std": 0.3319,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8186,
+        "ELEVATED": 0.8222,
+        "URGENT": 0.7222
+      },
+      "seed": 6
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 270,
+      "unmatched_count": 30,
+      "fill_rate": 0.9,
+      "mean_match_score": 0.8664,
+      "provider_utilization_std": 0.2469,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8945,
+        "ELEVATED": 0.9333,
+        "URGENT": 0.8889
+      },
+      "seed": 6
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 251,
+      "unmatched_count": 49,
+      "fill_rate": 0.8367,
+      "mean_match_score": 0.8246,
+      "provider_utilization_std": 0.3087,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8017,
+        "ELEVATED": 0.9778,
+        "URGENT": 0.9444
+      },
+      "seed": 6
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 252,
+      "unmatched_count": 48,
+      "fill_rate": 0.84,
+      "mean_match_score": 0.8714,
+      "provider_utilization_std": 0.2454,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8462,
+        "ELEVATED": 0.8036,
+        "URGENT": 0.9
+      },
+      "seed": 7
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 249,
+      "unmatched_count": 51,
+      "fill_rate": 0.83,
+      "mean_match_score": 0.8865,
+      "provider_utilization_std": 0.2929,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8291,
+        "ELEVATED": 0.8214,
+        "URGENT": 0.9
+      },
+      "seed": 7
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 268,
+      "unmatched_count": 32,
+      "fill_rate": 0.8933,
+      "mean_match_score": 0.8905,
+      "provider_utilization_std": 0.2279,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8932,
+        "ELEVATED": 0.8929,
+        "URGENT": 0.9
+      },
+      "seed": 7
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 245,
+      "unmatched_count": 55,
+      "fill_rate": 0.8167,
+      "mean_match_score": 0.8497,
+      "provider_utilization_std": 0.3175,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.7949,
+        "ELEVATED": 0.8929,
+        "URGENT": 0.9
+      },
+      "seed": 7
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 273,
+      "unmatched_count": 27,
+      "fill_rate": 0.91,
+      "mean_match_score": 0.8588,
+      "provider_utilization_std": 0.167,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9043,
+        "URGENT": 0.913,
+        "ELEVATED": 0.9362
+      },
+      "seed": 8
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 255,
+      "unmatched_count": 45,
+      "fill_rate": 0.85,
+      "mean_match_score": 0.8946,
+      "provider_utilization_std": 0.2493,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8783,
+        "URGENT": 0.7391,
+        "ELEVATED": 0.766
+      },
+      "seed": 8
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 287,
+      "unmatched_count": 13,
+      "fill_rate": 0.9567,
+      "mean_match_score": 0.888,
+      "provider_utilization_std": 0.1323,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9565,
+        "URGENT": 1.0,
+        "ELEVATED": 0.9362
+      },
+      "seed": 8
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 264,
+      "unmatched_count": 36,
+      "fill_rate": 0.88,
+      "mean_match_score": 0.8429,
+      "provider_utilization_std": 0.2301,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8565,
+        "URGENT": 1.0,
+        "ELEVATED": 0.9362
+      },
+      "seed": 8
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 259,
+      "unmatched_count": 41,
+      "fill_rate": 0.8633,
+      "mean_match_score": 0.8689,
+      "provider_utilization_std": 0.2535,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8571,
+        "ELEVATED": 0.88,
+        "URGENT": 0.8947
+      },
+      "seed": 9
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 248,
+      "unmatched_count": 52,
+      "fill_rate": 0.8267,
+      "mean_match_score": 0.9,
+      "provider_utilization_std": 0.326,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8398,
+        "ELEVATED": 0.8,
+        "URGENT": 0.7368
+      },
+      "seed": 9
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 275,
+      "unmatched_count": 25,
+      "fill_rate": 0.9167,
+      "mean_match_score": 0.8827,
+      "provider_utilization_std": 0.228,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9177,
+        "ELEVATED": 0.92,
+        "URGENT": 0.8947
+      },
+      "seed": 9
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 250,
+      "unmatched_count": 50,
+      "fill_rate": 0.8333,
+      "mean_match_score": 0.837,
+      "provider_utilization_std": 0.3158,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8095,
+        "ELEVATED": 0.92,
+        "URGENT": 0.8947
+      },
+      "seed": 9
+    },
+    {
+      "strategy": "greedy",
+      "client_count": 300,
+      "matched_count": 260,
+      "unmatched_count": 40,
+      "fill_rate": 0.8667,
+      "mean_match_score": 0.8846,
+      "provider_utilization_std": 0.2311,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8565,
+        "ELEVATED": 0.8615,
+        "URGENT": 0.9615
+      },
+      "seed": 10
+    },
+    {
+      "strategy": "stable_matching",
+      "client_count": 300,
+      "matched_count": 254,
+      "unmatched_count": 46,
+      "fill_rate": 0.8467,
+      "mean_match_score": 0.9071,
+      "provider_utilization_std": 0.2481,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.8373,
+        "ELEVATED": 0.8462,
+        "URGENT": 0.9231
+      },
+      "seed": 10
+    },
+    {
+      "strategy": "optimal",
+      "client_count": 300,
+      "matched_count": 274,
+      "unmatched_count": 26,
+      "fill_rate": 0.9133,
+      "mean_match_score": 0.9035,
+      "provider_utilization_std": 0.2088,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.9043,
+        "ELEVATED": 0.9077,
+        "URGENT": 1.0
+      },
+      "seed": 10
+    },
+    {
+      "strategy": "waitlist_priority",
+      "client_count": 300,
+      "matched_count": 258,
+      "unmatched_count": 42,
+      "fill_rate": 0.86,
+      "mean_match_score": 0.848,
+      "provider_utilization_std": 0.2527,
+      "fill_rate_by_urgency": {
+        "ROUTINE": 0.823,
+        "ELEVATED": 0.9231,
+        "URGENT": 1.0
+      },
+      "seed": 10
+    }
+  ],
+  "aggregates": [
+    {
+      "strategy": "greedy",
+      "runs": 10,
+      "mean_fill_rate": 0.857,
+      "std_fill_rate": 0.0226,
+      "mean_match_score_mean": 0.8651,
+      "mean_match_score_std": 0.0144,
+      "mean_provider_utilization_std": 0.2501,
+      "mean_fill_rate_by_urgency": {
+        "ROUTINE": 0.8501,
+        "URGENT": 0.9103,
+        "ELEVATED": 0.8607
+      }
+    },
+    {
+      "strategy": "stable_matching",
+      "runs": 10,
+      "mean_fill_rate": 0.8303,
+      "std_fill_rate": 0.0221,
+      "mean_match_score_mean": 0.8894,
+      "mean_match_score_std": 0.0167,
+      "mean_provider_utilization_std": 0.2977,
+      "mean_fill_rate_by_urgency": {
+        "ROUTINE": 0.827,
+        "URGENT": 0.8378,
+        "ELEVATED": 0.837
+      }
+    },
+    {
+      "strategy": "optimal",
+      "runs": 10,
+      "mean_fill_rate": 0.9143,
+      "std_fill_rate": 0.0198,
+      "mean_match_score_mean": 0.8844,
+      "mean_match_score_std": 0.0095,
+      "mean_provider_utilization_std": 0.2114,
+      "mean_fill_rate_by_urgency": {
+        "ROUTINE": 0.9109,
+        "URGENT": 0.9365,
+        "ELEVATED": 0.9186
+      }
+    },
+    {
+      "strategy": "waitlist_priority",
+      "runs": 10,
+      "mean_fill_rate": 0.838,
+      "std_fill_rate": 0.0239,
+      "mean_match_score_mean": 0.8374,
+      "mean_match_score_std": 0.0104,
+      "mean_provider_utilization_std": 0.2949,
+      "mean_fill_rate_by_urgency": {
+        "ROUTINE": 0.8026,
+        "URGENT": 0.9545,
+        "ELEVATED": 0.9375
+      }
+    }
+  ]
+}
