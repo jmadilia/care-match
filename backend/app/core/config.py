@@ -1,6 +1,6 @@
 from typing import Self
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     ADMIN_API_ENABLED: bool | None = None
     # When set, admin routes require this value in an X-Admin-Key header.
     ADMIN_API_KEY: str | None = None
+
+    # Hosted Postgres providers hand out postgres:// or postgresql:// URLs, which SQLAlchemy
+    # would resolve to a driver this project doesn't install.
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _use_the_psycopg_driver(cls, value: str) -> str:
+        for scheme in ("postgres://", "postgresql://"):
+            if value.startswith(scheme):
+                return "postgresql+psycopg://" + value.removeprefix(scheme)
+        return value
 
     @property
     def cors_origins(self) -> list[str]:
