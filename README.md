@@ -11,7 +11,7 @@ A therapist-client matching and waitlist optimization engine: an original take o
   <img alt="The strategy comparison page: fill rate by strategy, fill rate by urgency tier, and a results table for greedy, stable matching, optimal, and waitlist priority" src="docs/comparison-light.png" width="640">
 </picture>
 
-Two pages in the Next.js app make this explorable (on the live demo, the default comparison is served instantly from a snapshot; a custom one is computed on request and took about 45 seconds for 80 providers, 400 clients, and 5 seeds): `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` ranks a generated provider pool for a client's answers. Neither page stores anything: both regenerate their data from a seed per request and roll it back.
+Two pages in the Next.js app make this explorable (on the live demo, the default comparison is served instantly from a snapshot; a custom one is computed on request and took about 45 seconds for 80 providers, 400 clients, and 5 seeds): `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` ranks a generated provider pool for a client's answers. Neither page stores the synthetic populations: both regenerate them from a seed per request and roll it back. The only thing a deployment persists is the finished comparison results, as a bounded cache.
 
 ## Why this exists
 
@@ -145,7 +145,7 @@ The public API is deliberately small. With `ENVIRONMENT=production` and no other
 
 To keep the admin API on in a deployed environment, set `ADMIN_API_ENABLED=true` and `ADMIN_API_KEY`; requests then need an `X-Admin-Key` header, and the app refuses to start if the admin API is enabled outside local without a key.
 
-The database needs only the schema (`cd backend && uv run alembic upgrade head`) and no seed data: comparisons and intake generate their populations from a seed per request and roll everything back. Also set `DATABASE_URL`. If the frontend is served from a different origin than the API, set `BACKEND_CORS_ORIGINS` and the frontend's `NEXT_PUBLIC_API_URL` as well; the Vercel setup below doesn't need either.
+The database needs only the schema (`cd backend && uv run alembic upgrade head`) and no seed data: comparisons and intake generate their populations from a seed per request and roll everything back. The one table that holds data is `comparison_cache` (below), which a deployment fills on demand. Also set `DATABASE_URL`. If the frontend is served from a different origin than the API, set `BACKEND_CORS_ORIGINS` and the frontend's `NEXT_PUBLIC_API_URL` as well; the Vercel setup below doesn't need either.
 
 ### On Vercel
 
@@ -157,7 +157,7 @@ The frontend and backend deploy as two [Vercel Services](https://vercel.com/docs
 
 To try the same layout locally, run `npx vercel dev -L` from the repository root.
 
-Outside local the engine opens no connection pool (the database's own pooler does that job) and turns off prepared statements, which a transaction-mode pooler can't carry between requests. The default comparison is served from the committed snapshot, so it costs almost no compute. Any other comparison is computed live, up to about a minute on a laptop; `maxDuration` is set to 180 seconds; a custom comparison of 80 providers, 400 clients, and 5 seeds measured about 45 seconds on the deployed function. The in-memory cache for those custom comparisons is per function instance, so it is best-effort there.
+Outside local the engine opens no connection pool (the database's own pooler does that job) and turns off prepared statements, which a transaction-mode pooler can't carry between requests. The default comparison is served from the committed snapshot, so it costs almost no compute. Any other comparison is computed live, up to about a minute on a laptop; `maxDuration` is set to 180 seconds; a custom comparison of 80 providers, 400 clients, and 5 seeds measured about 45 seconds on the deployed function. Custom comparisons are cached in layers, since each is a pure function of its request: a per-instance in-memory LRU, then a `comparison_cache` table in the database that every function instance shares, so a result computed once is reused everywhere. Rows are keyed by a hash of the request and the deployed commit, so a deploy that changes matching behavior never serves results the old code computed, and the table keeps only the newest 200 rows because the request space (arbitrary seeds) is otherwise unbounded. Identical concurrent requests on one instance share a single computation; two different instances can still compute the same new request at once, which is why the endpoint also wants a rate limit. Locally the cache stays in memory and writes nothing.
 
 ## Project layout
 
