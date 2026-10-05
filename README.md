@@ -1,5 +1,7 @@
 # Care Match
 
+**Live demo: [care-match-three.vercel.app](https://care-match-three.vercel.app/)**
+
 A therapist-client matching and waitlist optimization engine: an original take on the hardest problem underneath any telehealth marketplace, which is pairing a client with the right available provider, fast, without a licensure, insurance-panel, or capacity constraint silently producing a bad match.
 
 **The headline result.** Four matching strategies run against identical synthetic populations (60 providers, 300 clients, 10 seeds). Optimal assignment serves the most clients (91.4%) and balances provider load best, but only one strategy, waitlist priority, lets clinical urgency change who gets served: it fills 95.5% of urgent clients versus 80.3% of routine ones, a 15.2-point gap, while the other three show gaps of 1 to 6 points that are incidental, since they never look at urgency at all. Every number is reproducible from a seed. Full results and the tradeoffs behind them are in [Results](#results).
@@ -9,7 +11,7 @@ A therapist-client matching and waitlist optimization engine: an original take o
   <img alt="The strategy comparison page: fill rate by strategy, fill rate by urgency tier, and a results table for greedy, stable matching, optimal, and waitlist priority" src="docs/comparison-light.png" width="640">
 </picture>
 
-Two pages in the Next.js app make this explorable: `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` ranks a generated provider pool for a client's answers. Neither page stores anything: both regenerate their data from a seed per request and roll it back.
+Two pages in the Next.js app make this explorable (on the live demo, the default comparison is served instantly from a snapshot; a custom one is computed on request and took about 45 seconds for 80 providers, 400 clients, and 5 seeds): `/comparisons` runs the comparison with your own scenario, seed count, and population size, and `/intake` ranks a generated provider pool for a client's answers. Neither page stores anything: both regenerate their data from a seed per request and roll it back.
 
 ## Why this exists
 
@@ -147,7 +149,7 @@ The database needs only the schema (`cd backend && uv run alembic upgrade head`)
 
 ### On Vercel
 
-The frontend and backend deploy as two [Vercel Services](https://vercel.com/docs/services) of a single project, defined by the `vercel.json` at the repository root: `frontend/` is served at `/`, and the FastAPI app in `backend/` receives everything under `/api`. Because both live on one domain, the frontend calls the API with relative URLs. There is no `NEXT_PUBLIC_API_URL`, no CORS configuration, and no deploy-order step. Services is in Beta, and I have only exercised this layout with `vercel dev` locally.
+The frontend and backend deploy as two [Vercel Services](https://vercel.com/docs/services) of a single project, defined by the `vercel.json` at the repository root: `frontend/` is served at `/`, and the FastAPI app in `backend/` receives everything under `/api`. Because both live on one domain, the frontend calls the API with relative URLs. There is no `NEXT_PUBLIC_API_URL`, no CORS configuration, and no deploy-order step. Services is in Beta. This layout is what the live demo runs on.
 
 1. **Database.** Add Neon from the Marketplace. Run the migrations once from your machine against its direct (unpooled) connection string: `cd backend && DATABASE_URL="<direct connection string>" uv run alembic upgrade head`. Hosted providers hand out `postgres://` or `postgresql://` URLs; the settings rewrite them to the `postgresql+psycopg://` form SQLAlchemy needs.
 2. **Project.** Import the repository with the Root Directory left at the repository root. If the dashboard asks for a framework preset, choose the Services option. Vercel finds the FastAPI `app` in `backend/app/main.py`, installs from `pyproject.toml` and `uv.lock`, and applies the `maxDuration` and the test-file exclusion from the service's `functions` entry.
@@ -155,7 +157,7 @@ The frontend and backend deploy as two [Vercel Services](https://vercel.com/docs
 
 To try the same layout locally, run `npx vercel dev -L` from the repository root.
 
-Outside local the engine opens no connection pool (the database's own pooler does that job) and turns off prepared statements, which a transaction-mode pooler can't carry between requests. The default comparison is served from the committed snapshot, so it costs almost no compute. Any other comparison is computed live, up to about a minute on a laptop; `maxDuration` is set to 180 seconds as a starting point, since serverless CPUs may be slower, and should be tuned after measuring a real deployment. The in-memory cache for those custom comparisons is per function instance, so it is best-effort there.
+Outside local the engine opens no connection pool (the database's own pooler does that job) and turns off prepared statements, which a transaction-mode pooler can't carry between requests. The default comparison is served from the committed snapshot, so it costs almost no compute. Any other comparison is computed live, up to about a minute on a laptop; `maxDuration` is set to 180 seconds; a custom comparison of 80 providers, 400 clients, and 5 seeds measured about 45 seconds on the deployed function. The in-memory cache for those custom comparisons is per function instance, so it is best-effort there.
 
 ## Project layout
 
