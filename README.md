@@ -1,6 +1,6 @@
 # Care Match
 
-**Live demo: [care-match-three.vercel.app](https://care-match-three.vercel.app/)**
+**Live demo: [care-match-three.vercel.app](https://care-match-three.vercel.app/)** · [Case study](docs/case-study.md)
 
 A therapist-client matching and waitlist optimization engine: an original take on the hardest problem underneath any telehealth marketplace, which is pairing a client with the right available provider, fast, without a licensure, insurance-panel, or capacity constraint silently producing a bad match.
 
